@@ -93,6 +93,40 @@ function ArtistCreatePage({ isInModal = false, onSuccessInModal, onCancelInModal
             {/* {watch('artistImageUrl') && <Box component="img" src={watch('artistImageUrl')} alt="Aperçu" sx={{maxHeight: 100, mt:1, borderRadius:1}}/>} */}
             <TextField margin="normal" fullWidth label="Site Web (Optionnel)" type="url" {...register("websiteUrl")} error={!!errors.websiteUrl} helperText={errors.websiteUrl?.message}/>
 
+            {/* Sélection du provider d'emailing */}
+            <Controller
+              name="emailingProvider"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  select
+                  fullWidth
+                  label="Outil d'emailing (optionnel)"
+                  margin="normal"
+                  {...field}
+                  error={!!errors.emailingProvider}
+                  helperText={errors.emailingProvider?.message}
+                >
+                  <option value="">-- Sélectionner --</option>
+                  <option value="Mailchimp">Mailchimp</option>
+                  <option value="Brevo">Brevo</option>
+                  <option value="Mailjet">Mailjet</option>
+                  <option value="Autre">Autre</option>
+                </TextField>
+              )}
+            />
+
+            {/* Email newsletter */}
+            <TextField
+              margin="normal"
+              fullWidth
+              label="Email newsletter (optionnel)"
+              type="email"
+              {...register("newsletterEmail")}
+              error={!!errors.newsletterEmail}
+              helperText={errors.newsletterEmail?.message}
+            />
+
             <Box sx={{ mt: 2, mb: 1 }}>
                 <Typography variant="subtitle1" gutterBottom>Liens Sociaux (Optionnel)</Typography>
                 {socialLinkFields.map((item, index) => (

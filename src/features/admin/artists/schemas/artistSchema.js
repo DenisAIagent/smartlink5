@@ -11,4 +11,6 @@ export const artistSchema = z.object({
       url: z.string().url("URL invalide"),
     })
   ).optional(),
+  emailingProvider: z.enum(["Mailchimp", "Brevo", "Mailjet", "Autre"]).optional(),
+  newsletterEmail: z.string().email("Email de newsletter invalide").optional(),
 }); 

@@ -24,6 +24,7 @@ import {
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 
 // Schéma de validation Zod
 // CORRECTION 1: Chemin d'importation complet et correct pour smartLinkSchema
@@ -41,6 +42,7 @@ const SmartLinkForm = ({ smartLinkData = null, onFormSubmitSuccess }) => {
   const [artists, setArtists] = useState([]);
   const [loadingArtists, setLoadingArtists] = useState(true);
   const [formError, setFormError] = useState(null);
+  const navigate = useNavigate();
 
   const {
     register,
@@ -248,6 +250,16 @@ const SmartLinkForm = ({ smartLinkData = null, onFormSubmitSuccess }) => {
                 <FormHelperText>{errors.artistId.message}</FormHelperText>
               )}
             </FormControl>
+            {!loadingArtists && artists.length === 0 && (
+              <Button
+                variant="outlined"
+                color="primary"
+                sx={{ mt: 2, borderRadius: 99, fontWeight: 600 }}
+                onClick={() => navigate('/admin/artists/new')}
+              >
+                Créer un artiste
+              </Button>
+            )}
           </Grid>
 
           <Grid item xs={12} md={7}>
@@ -455,21 +467,13 @@ const SmartLinkForm = ({ smartLinkData = null, onFormSubmitSuccess }) => {
           >
             <Button
               type="submit"
+              fullWidth
               variant="contained"
               color="primary"
-              disabled={isSubmitting || loadingArtists}
-              startIcon={
-                isSubmitting ? (
-                  <CircularProgress size={20} color="inherit" />
-                ) : null
-              }
-              sx={{ minWidth: { xs: '100%', sm: 180 }, py: 1.5 }}
+              sx={{ mt: 3, mb: 2, fontWeight: 700, fontSize: '1.1rem', borderRadius: 99 }}
+              disabled={isSubmitting || artists.length === 0 || !watch('artistId')}
             >
-              {isSubmitting
-                ? 'Enregistrement...'
-                : isEditMode
-                ? 'Mettre à jour le SmartLink'
-                : 'Créer le SmartLink'}
+              {isSubmitting ? <CircularProgress size={24} /> : isEditMode ? 'Mettre à jour' : 'Créer le SmartLink'}
             </Button>
           </Grid>
         </Grid>
