@@ -4,21 +4,22 @@ import { createTheme } from '@mui/material/styles';
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#e74c3c', // Votre couleur d'accentuation (orange/rouge)
+      main: '#ff003c', // Rouge vibrant MDMC
     },
     secondary: {
-      main: '#1a202c', // Fond sombre pour la sidebar et éléments secondaires
+      main: '#1a1a1a', // Gris foncé pour éléments secondaires
     },
     background: {
-      default: '#f5f7fa', // Fond général de l'application (plus clair)
-      paper: '#ffffff',   // Fond des "cartes" ou sections (blanc pur)
+      default: '#0d0d0d', // Noir profond (fond principal)
+      paper: '#1a1a1a',   // Gris foncé (fonds de sections, cartes)
     },
     text: {
-      primary: '#1a202c',   // Couleur de texte principale (foncé)
-      secondary: '#718096', // Couleur de texte secondaire (gris)
+      primary: '#ffffff',   // Blanc pur (texte principal)
+      secondary: '#f5f5f5', // Gris neutre clair (texte secondaire)
     },
     // Vous pouvez aussi définir error, warning, info, success si besoin
     // error: { main: '#d32f2f' },
+    divider: '#1a1a1a', // Gris foncé pour les bordures subtiles
   },
   typography: {
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif',
