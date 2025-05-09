@@ -29,6 +29,7 @@ import Articles from './components/sections/Articles'; // Idem
 import Reviews from './components/sections/Reviews';   // Idem
 import Contact from './components/sections/Contact';   // Idem
 import AllReviews from './components/pages/AllReviews'; // Idem
+import ArtistPage from './pages/public/ArtistPage';
 
 // --- Pages/Composants Admin ---
 import AdminLogin from './components/admin/AdminLogin';     // Doit être le composant qui appelle apiService.auth.login()
@@ -174,6 +175,7 @@ function App() {
         {/* --- Routes Publiques --- */}
         <Route path="/" element={<HomePage openSimulator={openSimulator} />} />
         <Route path="/all-reviews" element={<AllReviews />} />
+        <Route path="/artists/:slug" element={<ArtistPage />} />
         <Route path="/admin" element={<AdminLogin />} /> {/* Page de login admin, publique */}
         <Route path="/smartlinks/:artistSlug/:trackSlug" element={<SmartLinkPage />} /> {/* Page publique SmartLink */}
 
