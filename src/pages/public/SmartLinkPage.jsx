@@ -21,7 +21,7 @@ import {
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import MusicNoteIcon from '@mui/icons-material/MusicNote'; // Icône générique, à remplacer idéalement
-import { SiSpotify, SiApplemusic, SiDeezer, SiYoutube, SiAmazonmusic, SiTidal } from 'react-icons/si';
+import { SiSpotify, SiApplemusic, SiYoutube, SiAmazonmusic, SiTidal } from 'react-icons/si';
 
 import apiService from "../../services/api.service"; // Chemin d'origine de l'utilisateur
 
@@ -176,10 +176,10 @@ const platformColors = {
 const platformIconMap = {
   spotify: SiSpotify,
   applemusic: SiApplemusic,
-  deezer: SiDeezer,
   youtube: SiYoutube,
   amazonmusic: SiAmazonmusic,
   tidal: SiTidal,
+  deezer: MusicNoteIcon, // Fallback générique car SiDeezer n'existe pas
 };
 
 const getPlatformIcon = (platform) => {
