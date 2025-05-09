@@ -23,14 +23,14 @@ const theme = createTheme({
   },
   typography: {
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif',
-    h1: { fontSize: '2.2rem', fontWeight: 600, marginBottom: '1rem', color: '#1a202c' }, // Ajusté pour être plus grand
-    h2: { fontSize: '1.8rem', fontWeight: 600, marginBottom: '1rem', color: '#1a202c' }, // Titres de section
-    h3: { fontSize: '1.4rem', fontWeight: 500, marginBottom: '0.75rem', color: '#1a202c' }, // Sous-titres
-    h4: { fontSize: '1.2rem', fontWeight: 500, marginBottom: '0.5rem', color: '#1a202c' },
-    body1: { fontSize: '1rem', color: '#4a5568' }, // Texte principal
-    body2: { fontSize: '0.875rem', color: '#718096' }, // Texte secondaire, helperText
+    h1: { fontSize: '2.2rem', fontWeight: 600, marginBottom: '1rem', color: '#ffffff' },
+    h2: { fontSize: '1.8rem', fontWeight: 600, marginBottom: '1rem', color: '#ffffff' },
+    h3: { fontSize: '1.4rem', fontWeight: 500, marginBottom: '0.75rem', color: '#ffffff' },
+    h4: { fontSize: '1.2rem', fontWeight: 500, marginBottom: '0.5rem', color: '#ffffff' },
+    body1: { fontSize: '1rem', color: '#ffffff' },
+    body2: { fontSize: '0.875rem', color: '#f5f5f5' },
     button: {
-      textTransform: 'none', // Pour que les boutons n'aient pas de majuscules par défaut
+      textTransform: 'none',
       fontWeight: 600,
     }
   },
