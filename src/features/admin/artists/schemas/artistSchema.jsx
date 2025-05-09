@@ -7,7 +7,7 @@ import { toast } from 'react-toastify';
 
 import apiService from '@/services/api.service'; // Adaptez le chemin si besoin
 // Assurez-vous que ce chemin pointe vers votre artistSchema.js complet
-import { artistSchema } from '@/features/admin/artists/schemas/artistSchema.jsx'; // Adaptez le chemin si besoin
+import { artistSchema } from '@/features/admin/artists/schemas/artistSchema.js';
 
 import {
     Box, Typography, Paper, TextField, Button,
