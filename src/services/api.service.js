@@ -78,6 +78,9 @@ export const smartLinkService = {
   // Nouvelle méthode pour logguer un clic sur une plateforme spécifique
   logPlatformClick: async (smartlinkId, platformData) => // platformData pourrait être { platformName: 'Spotify' }
     apiClient.post(`/smartlinks/${smartlinkId}/log-platform-click`, platformData), // POST /api/smartlinks/:id/log-platform-click
+
+  // Nouvelle méthode pour auto-fetch des liens de plateformes
+  fetchPlatformLinks: async (url) => apiClient.post('/smartlinks/fetch-platform-links', { url }),
 };
 
 // --- Service pour les Artistes ---

@@ -39,7 +39,13 @@ export const smartLinkSchema = z.object({
   platformLinks: z.array(platformLinkSchema)
     .min(1, { message: "Au moins un lien de plateforme est requis." }), // Rendre obligatoire au moins un lien
   trackingIds: trackingIdsSchema,
-  isPublished: z.boolean().optional().default(false)
+  isPublished: z.boolean().optional().default(false),
+  // Champs UTM ajoutés
+  utmSource: z.string().trim().max(100, { message: "utm_source trop long." }).optional().or(z.literal('')),
+  utmMedium: z.string().trim().max(100, { message: "utm_medium trop long." }).optional().or(z.literal('')),
+  utmCampaign: z.string().trim().max(100, { message: "utm_campaign trop long." }).optional().or(z.literal('')),
+  utmTerm: z.string().trim().max(100, { message: "utm_term trop long." }).optional().or(z.literal('')),
+  utmContent: z.string().trim().max(100, { message: "utm_content trop long." }).optional().or(z.literal('')),
 });
 
 // Type TypeScript dérivé (si besoin)

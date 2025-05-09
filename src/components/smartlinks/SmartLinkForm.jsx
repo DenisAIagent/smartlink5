@@ -43,6 +43,8 @@ const SmartLinkForm = ({ smartLinkData = null, onFormSubmitSuccess }) => {
   const [loadingArtists, setLoadingArtists] = useState(true);
   const [formError, setFormError] = useState(null);
   const navigate = useNavigate();
+  const [trackUrl, setTrackUrl] = useState('');
+  const [fetchingPlatforms, setFetchingPlatforms] = useState(false);
 
   const {
     register,
@@ -107,6 +109,27 @@ const SmartLinkForm = ({ smartLinkData = null, onFormSubmitSuccess }) => {
   const handleImageUploadSuccess = (imageUrl) => {
     setValue('coverImageUrl', imageUrl, { shouldValidate: true, shouldDirty: true });
     toast.info("L'image de couverture a été mise à jour dans le formulaire.");
+  };
+
+  const handleFetchPlatformLinks = async () => {
+    if (!trackUrl) {
+      toast.error('Merci de renseigner une URL ou un ISRC.');
+      return;
+    }
+    setFetchingPlatforms(true);
+    try {
+      const response = await apiService.smartlinks.fetchPlatformLinks(trackUrl);
+      if (response.platformLinks && response.platformLinks.length > 0) {
+        setValue('platformLinks', response.platformLinks, { shouldValidate: true, shouldDirty: true });
+        toast.success('Liens de plateformes récupérés et préremplis !');
+      } else {
+        toast.warn('Aucun lien de plateforme trouvé pour cette URL/ISRC.');
+      }
+    } catch (error) {
+      toast.error(error.message || 'Erreur lors de la récupération des liens de plateformes.');
+    } finally {
+      setFetchingPlatforms(false);
+    }
   };
 
   const onSubmit = async (data) => {
@@ -179,6 +202,26 @@ const SmartLinkForm = ({ smartLinkData = null, onFormSubmitSuccess }) => {
       >
         {isEditMode ? 'Modifier le SmartLink' : 'Créer un nouveau SmartLink'}
       </Typography>
+
+      {/* Champ Track URL/ISRC + bouton auto-remplissage */}
+      <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 3 }}>
+        <TextField
+          label="Track URL ou ISRC (Spotify, Apple Music, etc.)"
+          value={trackUrl}
+          onChange={e => setTrackUrl(e.target.value)}
+          fullWidth
+          variant="outlined"
+          placeholder="Collez ici un lien ou un ISRC pour auto-remplir les plateformes"
+        />
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={handleFetchPlatformLinks}
+          disabled={fetchingPlatforms || !trackUrl}
+        >
+          {fetchingPlatforms ? <CircularProgress size={22} /> : 'Auto-remplir'}
+        </Button>
+      </Box>
 
       {formError && (
         <Typography color="error" sx={{ mb: 2 }} role="alert">
@@ -312,6 +355,56 @@ const SmartLinkForm = ({ smartLinkData = null, onFormSubmitSuccess }) => {
           </Grid>
 
           <Grid item xs={12} md={6}>
+            {/* Champs UTM */}
+            <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 'bold' }}>Paramètres UTM (tracking campagne)</Typography>
+            <TextField
+              {...register('utmSource')}
+              label="utm_source"
+              fullWidth
+              variant="outlined"
+              error={!!errors.utmSource}
+              helperText={errors.utmSource?.message || 'Ex : newsletter, facebook, spotify...'}
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              {...register('utmMedium')}
+              label="utm_medium"
+              fullWidth
+              variant="outlined"
+              error={!!errors.utmMedium}
+              helperText={errors.utmMedium?.message || 'Ex : email, cpc, social, banner...'}
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              {...register('utmCampaign')}
+              label="utm_campaign"
+              fullWidth
+              variant="outlined"
+              error={!!errors.utmCampaign}
+              helperText={errors.utmCampaign?.message || 'Nom de la campagne (promo_album, lancement_single...)'}
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              {...register('utmTerm')}
+              label="utm_term"
+              fullWidth
+              variant="outlined"
+              error={!!errors.utmTerm}
+              helperText={errors.utmTerm?.message || 'Mot-clé (optionnel)'}
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              {...register('utmContent')}
+              label="utm_content"
+              fullWidth
+              variant="outlined"
+              error={!!errors.utmContent}
+              helperText={errors.utmContent?.message || 'Différencier des variantes d'une même campagne (optionnel)'}
+              sx={{ mb: 2 }}
+            />
+          </Grid>
+
+          <Grid item xs={12}>
             <TextField
               {...register('description')}
               label="Description (Optionnel)"
