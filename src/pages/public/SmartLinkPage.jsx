@@ -21,6 +21,7 @@ import {
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import MusicNoteIcon from '@mui/icons-material/MusicNote'; // Icône générique, à remplacer idéalement
+import { SiSpotify, SiApplemusic, SiDeezer, SiYoutube, SiAmazonmusic, SiTidal } from 'react-icons/si';
 
 import apiService from "../../services/api.service"; // Chemin d'origine de l'utilisateur
 
@@ -171,6 +172,20 @@ const platformColors = {
   // Ajoutez d'autres plateformes et leurs couleurs
 };
 
+// Mapping plateforme -> icône simple-icons
+const platformIconMap = {
+  spotify: SiSpotify,
+  applemusic: SiApplemusic,
+  deezer: SiDeezer,
+  youtube: SiYoutube,
+  amazonmusic: SiAmazonmusic,
+  tidal: SiTidal,
+};
+
+const getPlatformIcon = (platform) => {
+  const key = platform?.toLowerCase().replace(/\s/g, '');
+  return platformIconMap[key] || MusicNoteIcon;
+};
 
 const SmartLinkPage = () => {
   const { artistSlug, trackSlug } = useParams();
@@ -413,20 +428,34 @@ const SmartLinkPage = () => {
                   Écoutez maintenant sur :
                 </Typography>
                 <List sx={{width: '100%', p:0}}>
-                  {smartLink.platformLinks.filter(link => link.url && link.platform).map((link, index) => (
-                    <ListItem key={link.platform + index} disablePadding sx={{mb: 1.5}}>
-                      <PlatformButton
-                        variant="contained"
-                        // Utiliser une couleur spécifique à la plateforme ou une alternance
-                        platformcolor={platformColors[link.platform.toLowerCase().replace(/\s+/g, '')] || (index % 2 === 0 ? '#673ab7' : '#009688' )} // Exemple de couleurs alternées
-                        fullWidth
-                        onClick={() => handlePlatformLinkClick(link.platform, link.url, smartLink._id)} // Passer l'ID du SmartLink
-                        startIcon={<MusicNoteIcon />} // Idéalement, une icône spécifique par plateforme
-                      >
-                        {link.platform}
-                      </PlatformButton>
-                    </ListItem>
-                  ))}
+                  {smartLink.platformLinks.filter(link => link.url && link.platform).map((link, index) => {
+                    const Icon = getPlatformIcon(link.platform);
+                    const color = platformColors[link.platform?.toLowerCase()] || '#fff';
+                    return (
+                      <ListItem key={link.platform + index} disablePadding sx={{mb: 1.5}}>
+                        <PlatformButton
+                          platformcolor={color}
+                          fullWidth
+                          startIcon={<Icon size={28} />}
+                          onClick={() => handlePlatformLinkClick(link.platform, link.url, smartLink._id)}
+                          sx={{
+                            background: '#fff',
+                            color: '#0d0d0d',
+                            borderRadius: 99,
+                            fontWeight: 700,
+                            fontSize: '1.1rem',
+                            mb: 2,
+                            '&:hover': {
+                              background: color,
+                              color: '#fff',
+                            },
+                          }}
+                        >
+                          Écouter sur {link.platform}
+                        </PlatformButton>
+                      </ListItem>
+                    );
+                  })}
                 </List>
               </>
             ) : (
