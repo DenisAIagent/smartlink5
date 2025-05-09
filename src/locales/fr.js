@@ -350,6 +350,18 @@ export default {
       "send": "Envoyer",
       "close": "Fermer",
       "open": "Ouvrir l'assistant"
-    }
+    },
+
+    // --- Clés de navigation admin pour compatibilité rapide ---
+    "dashboard_nav": "Tableau de bord",
+    "reviews_nav": "Avis",
+    "smartlinks_nav": "SmartLinks",
+    "content_nav": "Contenu",
+    "media_nav": "Médias",
+    "marketing_nav": "Marketing",
+    "wordpress_nav": "WordPress",
+    "wordpress_sync_nav": "Synchronisation WordPress",
+    "landing_pages_nav": "Landing Pages",
+    "settings_nav": "Paramètres"
   } // Fin de la section admin
 }
