@@ -15,7 +15,7 @@ import {
     Paper,
     IconButton
 } from '@mui/material';
-import { DataGrid, GridColDef, GridActionsCellItem } from '@mui/x-data-grid';
+import { DataGrid, GridActionsCellItem } from '@mui/x-data-grid';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/DeleteOutline';
@@ -92,7 +92,7 @@ function ArtistListPage() {
     };
 
     // --- Définition des colonnes pour le DataGrid ---
-    const columns: GridColDef[] = [
+    const columns = [
          {
            field: 'artistImageUrl',
            headerName: 'Image',
