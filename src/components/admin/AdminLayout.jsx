@@ -1,7 +1,7 @@
 // src/components/admin/AdminLayout.jsx
 
 import React, { useState } from 'react';
-import { Outlet, NavLink } from 'react-router-dom';
+import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import {
   AppBar,
   Box,
@@ -15,6 +15,7 @@ import {
   ListItemText,
   Toolbar,
   Typography,
+  Button,
   useTheme,
 } from '@mui/material';
 
@@ -22,6 +23,9 @@ import MenuIcon from '@mui/icons-material/Menu';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import PeopleIcon from '@mui/icons-material/People';
 import LinkIcon from '@mui/icons-material/Link';
+import LogoutIcon from '@mui/icons-material/Logout';
+
+import apiService from '@/services/api.service'; // Assure-toi que l'alias @ est bien configuré
 
 const drawerWidth = 240;
 
@@ -34,17 +38,27 @@ const menuItems = [
 export default function AdminLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const theme = useTheme();
+  const navigate = useNavigate();
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
 
+  const handleLogout = async () => {
+    try {
+      await apiService.auth.logout?.(); // Optionnel selon ton backend
+    } catch (e) {
+      console.warn("Erreur pendant la déconnexion", e);
+    } finally {
+      localStorage.clear();
+      navigate('/admin', { replace: true });
+    }
+  };
+
   const drawer = (
     <div>
       <Toolbar>
-        <Typography variant="h6" noWrap>
-          Menu Admin
-        </Typography>
+        <Typography variant="h6" noWrap>Menu Admin</Typography>
       </Toolbar>
       <Divider />
       <List>
@@ -53,6 +67,7 @@ export default function AdminLayout() {
             key={path}
             component={NavLink}
             to={path}
+            onClick={() => setMobileOpen(false)}
             sx={{
               '&.active': {
                 backgroundColor: theme.palette.primary.main,
@@ -62,7 +77,6 @@ export default function AdminLayout() {
                 },
               },
             }}
-            onClick={() => setMobileOpen(false)} // Fermer drawer sur mobile
           >
             <ListItemIcon>{icon}</ListItemIcon>
             <ListItemText primary={label} />
@@ -84,16 +98,21 @@ export default function AdminLayout() {
         <Toolbar>
           <IconButton
             color="inherit"
-            aria-label="Ouvrir le menu"
+            aria-label="open drawer"
             edge="start"
             onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { sm: 'none' } }} // Masqué sur desktop
+            sx={{ mr: 2, display: { sm: 'none' } }}
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div">
+
+          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
             Panneau d’Administration
           </Typography>
+
+          <Button color="inherit" startIcon={<LogoutIcon />} onClick={handleLogout}>
+            Déconnexion
+          </Button>
         </Toolbar>
       </AppBar>
 
@@ -130,7 +149,7 @@ export default function AdminLayout() {
           flexGrow: 1,
           p: 3,
           width: { sm: `calc(100% - ${drawerWidth}px)` },
-          mt: 8, // pour décaler sous l'AppBar
+          mt: 8,
         }}
       >
         <Outlet />
