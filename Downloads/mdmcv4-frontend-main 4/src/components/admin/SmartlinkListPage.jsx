@@ -26,7 +26,7 @@ import {
 import { smartlinksService } from '../../services/smartlinks.service';
 import { artistsService } from '../../services/artists.service';
 
-const SmartlinkListPage = () => {
+const SmartlinkListPage = ({ onNavigateToCreate }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -55,7 +55,11 @@ const SmartlinkListPage = () => {
   };
 
   const handleCreate = () => {
-    navigate('/admin/smartlinks/create');
+    if (typeof onNavigateToCreate === 'function') {
+      onNavigateToCreate();
+    } else {
+      navigate('/admin/smartlinks/create');
+    }
   };
 
   const handleEdit = (id) => {
