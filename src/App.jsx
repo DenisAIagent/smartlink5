@@ -2,46 +2,44 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useLocation, NavLink } from 'react-router-dom';
 
-// Styles Globaux (Vérifie les chemins !)
 import './App.css';
 import './assets/styles/global.css';
 import './assets/styles/animations.css';
 
-// --- Services & Config ---
-import apiService from './services/api.service'; // Chemin vers ton instance Axios configurée
-import { updateMetaTags } from './i18n'; // Assure-toi que le chemin est correct
+import apiService from './services/api.service';
+import { updateMetaTags } from './i18n';
 
-// --- Composants UI & Layout ---
 import { CircularProgress, Box, Typography } from '@mui/material';
-// Vérifie tous tes chemins d'import pour les composants ci-dessous :
+
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import Simulator from './components/features/Simulator';
 import CookieBanner from './components/features/CookieBanner';
 
-// --- Pages Publiques ---
-import Hero from './components/sections/Hero'; // Assure-toi que ce composant existe et est importable
-import Services from './components/sections/Services'; // Idem
-import About from './components/sections/About';     // Idem
-import Articles from './components/sections/Articles'; // Idem
-import Reviews from './components/sections/Reviews';   // Idem
-import Contact from './components/sections/Contact';   // Idem
-import AllReviews from './components/pages/AllReviews'; // Idem
+import Hero from './components/sections/Hero';
+import Services from './components/sections/Services';
+import About from './components/sections/About';
+import Articles from './components/sections/Articles';
+import Reviews from './components/sections/Reviews';
+import Contact from './components/sections/Contact';
+import AllReviews from './components/pages/AllReviews';
 import ArtistPage from './pages/public/ArtistPage';
 
-// --- Pages/Composants Admin ---
-import AdminLogin from './components/admin/AdminLogin';     // Doit être le composant qui appelle apiService.auth.login()
-import AdminPanel from './components/admin/AdminPanel';     // Dashboard principal
-import ArtistListPage from './pages/admin/artists/ArtistListPage'; // Page liste artistes
-import ArtistCreatePage from './pages/admin/artists/ArtistCreatePage'; // Page création artiste
-import ArtistEditPage from './pages/admin/artists/ArtistEditPage';   // Page édition artiste
+import AdminLogin from './components/admin/AdminLogin';
+import AdminPanel from './components/admin/AdminPanel';
+import ArtistListPage from './pages/admin/artists/ArtistListPage';
+import ArtistCreatePage from './pages/admin/artists/ArtistCreatePage';
+import ArtistEditPage from './pages/admin/artists/ArtistEditPage';
 
-// --- Page Publique SmartLink (Basé sur rapport Manus.im) ---
-import SmartLinkPage from './pages/public/SmartLinkPage'; // Assure-toi que ce composant existe et est importable
+import SmartlinkListPage from './pages/admin/smartlinks/SmartlinkListPage';
+import SmartlinkCreatePage from './pages/admin/smartlinks/SmartlinkCreatePage';
+import SmartlinkEditPage from './pages/admin/smartlinks/SmartlinkEditPage';
 
-// === ProtectedRoute (Vérifie l'authentification via API) ===
+import SmartLinkPage from './pages/public/SmartLinkPage';
+
+// === ProtectedRoute ===
 const ProtectedRoute = ({ children }) => {
   const [authStatus, setAuthStatus] = useState({
     isLoading: true,
@@ -56,36 +54,27 @@ const ProtectedRoute = ({ children }) => {
       if (!isMounted) return;
       setAuthStatus(prev => ({ ...prev, isLoading: true }));
       try {
-        console.log("ProtectedRoute: Vérification auth via apiService.auth.getMe()...");
         const response = await apiService.auth.getMe();
-
         if (isMounted) {
           if (response.success && response.data) {
-            console.log("ProtectedRoute: Auth check réussi", response.data);
             setAuthStatus({
               isLoading: false,
               isAuthenticated: true,
               isAdmin: response.data.role === 'admin',
             });
-            if (response.data.role !== 'admin') {
-              console.warn("ProtectedRoute: Utilisateur authentifié mais PAS admin.");
-            }
           } else {
-            console.warn("ProtectedRoute: Auth check a renvoyé success:false ou data manquante.");
             setAuthStatus({ isLoading: false, isAuthenticated: false, isAdmin: false });
           }
         }
-      } catch (error) { 
+      } catch {
         if (isMounted) {
-          console.error("ProtectedRoute: Auth check API error:", error.status, error.message, error.data);
           setAuthStatus({ isLoading: false, isAuthenticated: false, isAdmin: false });
         }
       }
     };
-
     checkAuth();
     return () => { isMounted = false; };
-  }, [location.key]); 
+  }, [location.key]);
 
   if (authStatus.isLoading) {
     return (
@@ -97,40 +86,37 @@ const ProtectedRoute = ({ children }) => {
   }
 
   if (!authStatus.isAuthenticated || !authStatus.isAdmin) {
-    console.log(`ProtectedRoute: Redirection vers /admin (login). Auth: ${authStatus.isAuthenticated}, Admin: ${authStatus.isAdmin}`);
     return <Navigate to="/admin" state={{ from: location }} replace />;
   }
 
-  return children; 
+  return children;
 };
 
-// === Layout pour les Pages Admin ===
-const AdminLayout = () => {
-  return (
-    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      <Box component="nav" sx={{ width: { sm: 240 }, flexShrink: { sm: 0 }, bgcolor: 'background.paper', borderRight: 1, borderColor: 'divider' }}>
-        <Typography variant="h6" sx={{ p: 2 }}>Menu Admin</Typography>
-        {/* TODO: Liens de navigation admin ici (ex: Dashboard, Artistes, SmartLinks) */}
-      </Box>
-      <Box
-        component="main"
-        sx={{ flexGrow: 1, p: 3, width: { sm: `calc(100% - 240px)` } }}
-      >
-        <Outlet /> {/* Rend les composants des sous-routes admin */}
+// === Admin Layout avec Menu ===
+const AdminLayout = () => (
+  <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+    <Box component="nav" sx={{ width: { sm: 240 }, bgcolor: 'background.paper', borderRight: 1, borderColor: 'divider', p: 2 }}>
+      <Typography variant="h6" sx={{ mb: 2 }}>Menu Admin</Typography>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+        <NavLink to="/admin/dashboard">Dashboard</NavLink>
+        <NavLink to="/admin/artists">Artistes</NavLink>
+        <NavLink to="/admin/smartlinks">SmartLinks</NavLink>
       </Box>
     </Box>
-  );
-};
+    <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+      <Outlet />
+    </Box>
+  </Box>
+);
 
-// === Composant pour la Page d'Accueil Publique ===
+// === HomePage ===
 const HomePage = ({ openSimulator }) => {
   useEffect(() => {
-    console.log("HomePage a été rendu !"); // Log pour vérifier si HomePage est atteint
+    console.log("HomePage a été rendu !");
   }, []);
-
   return (
     <>
-      <Header /> 
+      <Header />
       <main>
         <Hero openSimulator={openSimulator} />
         <Services />
@@ -139,70 +125,61 @@ const HomePage = ({ openSimulator }) => {
         <Reviews />
         <Contact />
       </main>
-      <Footer openSimulator={openSimulator} /> 
+      <Footer openSimulator={openSimulator} />
       <CookieBanner />
     </>
   );
 };
 
-// === Composant Principal de l'Application ===
+// === App ===
 function App() {
   const { t, i18n } = useTranslation();
   const simulatorRef = useRef(null);
 
   useEffect(() => {
-    updateMetaTags(t); 
+    updateMetaTags(t);
     const lang = i18n.language.split('-')[0];
     document.documentElement.setAttribute('lang', lang);
     const ogLocaleValue = i18n.language.replace('-', '_');
     const ogLocaleElement = document.querySelector('meta[property="og:locale"]');
-    if (ogLocaleElement) {
-      ogLocaleElement.setAttribute('content', ogLocaleValue);
-    }
+    if (ogLocaleElement) ogLocaleElement.setAttribute('content', ogLocaleValue);
   }, [t, i18n.language]);
 
   const openSimulator = () => {
     if (simulatorRef.current) {
-      simulatorRef.current.openSimulator(); 
+      simulatorRef.current.openSimulator();
     }
   };
 
   return (
     <Router>
-      <Simulator ref={simulatorRef} /> 
-
+      <Simulator ref={simulatorRef} />
       <Routes>
-        {/* --- Routes Publiques --- */}
+        {/* Public */}
         <Route path="/" element={<HomePage openSimulator={openSimulator} />} />
         <Route path="/all-reviews" element={<AllReviews />} />
         <Route path="/artists/:slug" element={<ArtistPage />} />
-        <Route path="/admin" element={<AdminLogin />} /> {/* Page de login admin, publique */}
-        <Route path="/smartlinks/:artistSlug/:trackSlug" element={<SmartLinkPage />} /> {/* Page publique SmartLink */}
+        <Route path="/admin" element={<AdminLogin />} />
+        <Route path="/smartlinks/:artistSlug/:trackSlug" element={<SmartLinkPage />} />
 
-        {/* --- Routes Admin Protégées --- */}
-        {/* Ce groupe de routes est protégé. Le path="/admin" ici crée un contexte de chemin. */}
+        {/* Admin */}
         <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
-          {/* path="dashboard" est relatif à "/admin" -> donc "/admin/dashboard" */}
           <Route path="dashboard" element={<AdminPanel />} />
-          {/* La route index n'est plus nécessaire ici si AdminLogin redirige bien vers "dashboard" */}
-          {/* <Route index element={<Navigate to="dashboard" replace />} /> */}
-          
-          <Route path="artists" element={<Outlet />}> {/* Crée un contexte pour /admin/artists */}
-            <Route index element={<ArtistListPage />} /> {/* /admin/artists */}
-            <Route path="new" element={<ArtistCreatePage />} /> {/* /admin/artists/new */}
-            <Route path="edit/:slug" element={<ArtistEditPage />} /> {/* /admin/artists/edit/:slug */}
+
+          <Route path="artists" element={<Outlet />}>
+            <Route index element={<ArtistListPage />} />
+            <Route path="new" element={<ArtistCreatePage />} />
+            <Route path="edit/:slug" element={<ArtistEditPage />} />
           </Route>
 
-          {/* Routes Smartlinks (à créer et décommenter) */}
-          {/* <Route path="smartlinks" element={<Outlet />}>
+          <Route path="smartlinks" element={<Outlet />}>
             <Route index element={<SmartlinkListPage />} />
             <Route path="new" element={<SmartlinkCreatePage />} />
-            <Route path="edit/:id" element={<SmartlinkEditPage />} />
+            <Route path="edit/:smartlinkId" element={<SmartlinkEditPage />} />
           </Route>
-          */}
         </Route>
 
-        {/* --- Route Catch-all (404 Not Found) --- */}
+        {/* 404 */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
