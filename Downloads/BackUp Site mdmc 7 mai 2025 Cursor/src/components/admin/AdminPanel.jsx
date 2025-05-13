@@ -65,10 +65,13 @@ const menuItems = [
     path: "/admin/reviews", 
     icon: <RateReviewIcon />
   },
-  { 
-    label: "Landing Pages", 
-    path: "/admin/landing-pages", 
-    icon: <WebIcon />
+  {
+    label: "Landing Pages",
+    icon: <WebIcon />,
+    children: [
+      { label: "Créer une Landing Page", path: "/admin/landing-pages/create" },
+      { label: "Gérer les Landing Pages", path: "/admin/landing-pages" }
+    ]
   },
   { 
     label: "Intégrations Marketing", 
