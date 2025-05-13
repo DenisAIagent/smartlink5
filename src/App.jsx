@@ -1,3 +1,5 @@
+// src/App.jsx
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -7,16 +9,20 @@ import {
   Navigate,
   Outlet,
   useLocation,
+  useNavigate,
   NavLink
 } from 'react-router-dom';
 
+// Global styles
 import './App.css';
 import './assets/styles/global.css';
 import './assets/styles/animations.css';
 
+// Services & i18n
 import apiService from './services/api.service';
 import { updateMetaTags } from './i18n';
 
+// MUI components
 import {
   CircularProgress,
   Box,
@@ -41,11 +47,13 @@ import PeopleIcon from '@mui/icons-material/People';
 import LinkIcon from '@mui/icons-material/Link';
 import LogoutIcon from '@mui/icons-material/Logout';
 
+// Layout components
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import Simulator from './components/features/Simulator';
 import CookieBanner from './components/features/CookieBanner';
 
+// Public sections
 import Hero from './components/sections/Hero';
 import Services from './components/sections/Services';
 import About from './components/sections/About';
@@ -56,6 +64,7 @@ import AllReviews from './components/pages/AllReviews';
 import ArtistPage from './pages/public/ArtistPage';
 import SmartLinkPage from './pages/public/SmartLinkPage';
 
+// Admin pages
 import AdminLogin from './components/admin/AdminLogin';
 import AdminPanel from './components/admin/AdminPanel';
 import ArtistListPage from './pages/admin/artists/ArtistListPage';
@@ -118,15 +127,14 @@ const ProtectedRoute = ({ children }) => {
 const AdminLayout = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const theme = useTheme();
-  const navigate = useLocation();
-  const history = useNavigate();
+  const navigate = useNavigate();
 
   const handleLogout = async () => {
     try {
       await apiService.auth.logout?.();
     } catch {}
     localStorage.clear();
-    history('/admin', { replace: true });
+    navigate('/admin', { replace: true });
   };
 
   const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
@@ -181,22 +189,8 @@ const AdminLayout = () => {
         </Toolbar>
       </AppBar>
 
-      <Drawer
-        variant="temporary"
-        open={mobileOpen}
-        onClose={handleDrawerToggle}
-        sx={{ display: { xs: 'block', sm: 'none' }, '& .MuiDrawer-paper': { width: drawerWidth } }}
-      >
-        {drawer}
-      </Drawer>
-
-      <Drawer
-        variant="permanent"
-        sx={{ display: { xs: 'none', sm: 'block' }, '& .MuiDrawer-paper': { width: drawerWidth } }}
-        open
-      >
-        {drawer}
-      </Drawer>
+      <Drawer variant="temporary" open={mobileOpen} onClose={handleDrawerToggle} sx={{ display: { xs: 'block', sm: 'none' }, '& .MuiDrawer-paper': { width: drawerWidth } }}>{drawer}</Drawer>
+      <Drawer variant="permanent" sx={{ display: { xs: 'none', sm: 'block' }, '& .MuiDrawer-paper': { width: drawerWidth } }} open>{drawer}</Drawer>
 
       <Box component="main" sx={{ flexGrow: 1, p: 3, width: { sm: `calc(100% - ${drawerWidth}px)` }, mt: 8 }}>
         <Outlet />
@@ -266,12 +260,7 @@ function App() {
             <Route path="edit/:smartlinkId" element={<SmartlinkEditPage />} />
           </Route>
           <Route path="landing-pages" element={<LandingPageGenerator />} />
-          <Route path="wordpress" element={
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-              <WordPressConnector />
-              <WordPressSync />
-            </Box>
-          } />
+          <Route path="wordpress" element={<Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}><WordPressConnector /><WordPressSync /></Box>} />
           <Route path="reviews" element={<ReviewManager />} />
           <Route path="stats" element={<CampaignStatsShowcase />} />
         </Route>
