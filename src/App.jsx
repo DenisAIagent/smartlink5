@@ -1,5 +1,3 @@
-// src/App.jsx
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -13,16 +11,13 @@ import {
   NavLink
 } from 'react-router-dom';
 
-// Global styles
 import './App.css';
 import './assets/styles/global.css';
 import './assets/styles/animations.css';
 
-// Services & i18n
 import apiService from './services/api.service';
 import { updateMetaTags } from './i18n';
 
-// MUI components
 import {
   CircularProgress,
   Box,
@@ -47,13 +42,12 @@ import PeopleIcon from '@mui/icons-material/People';
 import LinkIcon from '@mui/icons-material/Link';
 import LogoutIcon from '@mui/icons-material/Logout';
 
-// Layout components
+// Layout & components
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import Simulator from './components/features/Simulator';
 import CookieBanner from './components/features/CookieBanner';
 
-// Public sections
 import Hero from './components/sections/Hero';
 import Services from './components/sections/Services';
 import About from './components/sections/About';
@@ -64,7 +58,6 @@ import AllReviews from './components/pages/AllReviews';
 import ArtistPage from './pages/public/ArtistPage';
 import SmartLinkPage from './pages/public/SmartLinkPage';
 
-// Admin pages
 import AdminLogin from './components/admin/AdminLogin';
 import AdminPanel from './components/admin/AdminPanel';
 import ArtistListPage from './pages/admin/artists/ArtistListPage';
@@ -118,7 +111,7 @@ const ProtectedRoute = ({ children }) => {
   }
 
   if (!authStatus.isAuthenticated || !authStatus.isAdmin) {
-    return <Navigate to="/admin" state={{ from: location }} replace />;
+    return <Navigate to="/admin/login" state={{ from: location }} replace />;
   }
 
   return children;
@@ -134,7 +127,7 @@ const AdminLayout = () => {
       await apiService.auth.logout?.();
     } catch {}
     localStorage.clear();
-    navigate('/admin', { replace: true });
+    navigate('/admin/login', { replace: true });
   };
 
   const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
@@ -200,9 +193,7 @@ const AdminLayout = () => {
 };
 
 const HomePage = ({ openSimulator }) => {
-  useEffect(() => {
-    console.log("HomePage rendu");
-  }, []);
+  useEffect(() => { console.log("HomePage rendu"); }, []);
   return (
     <>
       <Header />
@@ -243,10 +234,12 @@ function App() {
         <Route path="/" element={<HomePage openSimulator={openSimulator} />} />
         <Route path="/all-reviews" element={<AllReviews />} />
         <Route path="/artists/:slug" element={<ArtistPage />} />
-        <Route path="/admin" element={<AdminLogin />} />
         <Route path="/smartlinks/:artistSlug/:trackSlug" element={<SmartLinkPage />} />
 
-        {/* Admin */}
+        {/* Admin login */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+
+        {/* Admin panel */}
         <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
           <Route path="dashboard" element={<AdminPanel />} />
           <Route path="artists" element={<Outlet />}>
@@ -264,6 +257,9 @@ function App() {
           <Route path="reviews" element={<ReviewManager />} />
           <Route path="stats" element={<CampaignStatsShowcase />} />
         </Route>
+
+        {/* Redirect /admin to /admin/login */}
+        <Route path="/admin" element={<Navigate to="/admin/login" replace />} />
 
         {/* 404 */}
         <Route path="*" element={<Navigate to="/" replace />} />
