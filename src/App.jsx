@@ -11,7 +11,19 @@ import './assets/styles/animations.css';
 import apiService from './services/api.service';
 import { updateMetaTags } from './i18n';
 
-import { CircularProgress, Box, Typography } from '@mui/material';
+import {
+  CircularProgress,
+  Box,
+  Typography,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+} from '@mui/material';
+
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import PeopleIcon from '@mui/icons-material/People';
+import LinkIcon from '@mui/icons-material/Link';
 
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
@@ -92,22 +104,46 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
-// === Admin Layout avec Menu ===
-const AdminLayout = () => (
-  <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-    <Box component="nav" sx={{ width: { sm: 240 }, bgcolor: 'background.paper', borderRight: 1, borderColor: 'divider', p: 2 }}>
-      <Typography variant="h6" sx={{ mb: 2 }}>Menu Admin</Typography>
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-        <NavLink to="/admin/dashboard">Dashboard</NavLink>
-        <NavLink to="/admin/artists">Artistes</NavLink>
-        <NavLink to="/admin/smartlinks">SmartLinks</NavLink>
+// === Admin Layout avec menu stylisé ===
+const AdminLayout = () => {
+  const menuItems = [
+    { label: 'Dashboard', path: '/admin/dashboard', icon: <DashboardIcon /> },
+    { label: 'Artistes', path: '/admin/artists', icon: <PeopleIcon /> },
+    { label: 'SmartLinks', path: '/admin/smartlinks', icon: <LinkIcon /> },
+  ];
+
+  return (
+    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+      <Box component="nav" sx={{ width: { sm: 240 }, bgcolor: 'background.paper', borderRight: 1, borderColor: 'divider' }}>
+        <Typography variant="h6" sx={{ p: 2 }}>Menu Admin</Typography>
+        <List>
+          {menuItems.map(({ label, path, icon }) => (
+            <ListItemButton
+              key={path}
+              component={NavLink}
+              to={path}
+              sx={{
+                '&.active': {
+                  backgroundColor: 'primary.main',
+                  color: 'white',
+                  '& .MuiListItemIcon-root': {
+                    color: 'white',
+                  },
+                }
+              }}
+            >
+              <ListItemIcon>{icon}</ListItemIcon>
+              <ListItemText primary={label} />
+            </ListItemButton>
+          ))}
+        </List>
+      </Box>
+      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+        <Outlet />
       </Box>
     </Box>
-    <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-      <Outlet />
-    </Box>
-  </Box>
-);
+  );
+};
 
 // === HomePage ===
 const HomePage = ({ openSimulator }) => {
