@@ -2,90 +2,111 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+  Outlet,
+  useLocation,
+  useNavigate,
+  NavLink
+} from 'react-router-dom';
 
-// Styles Globaux (Vérifie les chemins !)
+// Global styles
 import './App.css';
 import './assets/styles/global.css';
 import './assets/styles/animations.css';
 
-// --- Services & Config ---
-import apiService from './services/api.service'; // Chemin vers ton instance Axios configurée
-import { updateMetaTags } from './i18n'; // Assure-toi que le chemin est correct
+// Services & i18n
+import apiService from './services/api.service';
+import { updateMetaTags } from './i18n';
 
-// --- Composants UI & Layout ---
-import { CircularProgress, Box, Typography } from '@mui/material';
-// Vérifie tous tes chemins d'import pour les composants ci-dessous :
+// MUI components
+import {
+  CircularProgress,
+  Box,
+  Typography,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  CssBaseline,
+  AppBar,
+  Toolbar,
+  IconButton,
+  Button,
+  Drawer,
+  Divider,
+  useTheme,
+} from '@mui/material';
+
+import MenuIcon from '@mui/icons-material/Menu';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import PeopleIcon from '@mui/icons-material/People';
+import LinkIcon from '@mui/icons-material/Link';
+import LogoutIcon from '@mui/icons-material/Logout';
+
+// Layout components
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import Simulator from './components/features/Simulator';
 import CookieBanner from './components/features/CookieBanner';
 
-// --- Pages Publiques ---
-import Hero from './components/sections/Hero'; // Assure-toi que ce composant existe et est importable
-import Services from './components/sections/Services'; // Idem
-import About from './components/sections/About';     // Idem
-import Articles from './components/sections/Articles'; // Idem
-import Reviews from './components/sections/Reviews';   // Idem
-import Contact from './components/sections/Contact';   // Idem
-import AllReviews from './components/pages/AllReviews'; // Idem
+// Public sections
+import Hero from './components/sections/Hero';
+import Services from './components/sections/Services';
+import About from './components/sections/About';
+import Articles from './components/sections/Articles';
+import Reviews from './components/sections/Reviews';
+import Contact from './components/sections/Contact';
+import AllReviews from './components/pages/AllReviews';
 import ArtistPage from './pages/public/ArtistPage';
+import SmartLinkPage from './pages/public/SmartLinkPage';
 
-// --- Pages/Composants Admin ---
-import AdminLogin from './components/admin/AdminLogin';     // Doit être le composant qui appelle apiService.auth.login()
-import AdminPanel from './components/admin/AdminPanel';     // Dashboard principal
-import ArtistListPage from './pages/admin/artists/ArtistListPage'; // Page liste artistes
-import ArtistCreatePage from './pages/admin/artists/ArtistCreatePage'; // Page création artiste
-import ArtistEditPage from './pages/admin/artists/ArtistEditPage';   // Page édition artiste
+// Admin pages
+import AdminLogin from './components/admin/AdminLogin';
+import AdminPanel from './components/admin/AdminPanel';
+import ArtistListPage from './pages/admin/artists/ArtistListPage';
+import ArtistCreatePage from './pages/admin/artists/ArtistCreatePage';
+import ArtistEditPage from './pages/admin/artists/ArtistEditPage';
+import SmartlinkListPage from './pages/admin/smartlinks/SmartlinkListPage';
+import SmartlinkCreatePage from './pages/admin/smartlinks/SmartlinkCreatePage';
+import SmartlinkEditPage from './pages/admin/smartlinks/SmartlinkEditPage';
+import LandingPageGenerator from './components/admin/LandingPageGenerator';
+import WordPressConnector from './components/admin/WordPressConnector';
+import WordPressSync from './components/admin/WordPressSync';
+import ReviewManager from './components/admin/ReviewManager';
+import CampaignStatsShowcase from './components/landing/common/CampaignStatsShowcase';
 
-// --- Page Publique SmartLink (Basé sur rapport Manus.im) ---
-import SmartLinkPage from './pages/public/SmartLinkPage'; // Assure-toi que ce composant existe et est importable
+const drawerWidth = 240;
 
-// === ProtectedRoute (Vérifie l'authentification via API) ===
 const ProtectedRoute = ({ children }) => {
-  const [authStatus, setAuthStatus] = useState({
-    isLoading: true,
-    isAuthenticated: false,
-    isAdmin: false,
-  });
+  const [authStatus, setAuthStatus] = useState({ isLoading: true, isAuthenticated: false, isAdmin: false });
   const location = useLocation();
 
   useEffect(() => {
     let isMounted = true;
     const checkAuth = async () => {
       if (!isMounted) return;
-      setAuthStatus(prev => ({ ...prev, isLoading: true }));
       try {
-        console.log("ProtectedRoute: Vérification auth via apiService.auth.getMe()...");
         const response = await apiService.auth.getMe();
-
-        if (isMounted) {
-          if (response.success && response.data) {
-            console.log("ProtectedRoute: Auth check réussi", response.data);
-            setAuthStatus({
-              isLoading: false,
-              isAuthenticated: true,
-              isAdmin: response.data.role === 'admin',
-            });
-            if (response.data.role !== 'admin') {
-              console.warn("ProtectedRoute: Utilisateur authentifié mais PAS admin.");
-            }
-          } else {
-            console.warn("ProtectedRoute: Auth check a renvoyé success:false ou data manquante.");
-            setAuthStatus({ isLoading: false, isAuthenticated: false, isAdmin: false });
-          }
-        }
-      } catch (error) { 
-        if (isMounted) {
-          console.error("ProtectedRoute: Auth check API error:", error.status, error.message, error.data);
+        if (response.success && response.data) {
+          setAuthStatus({
+            isLoading: false,
+            isAuthenticated: true,
+            isAdmin: response.data.role === 'admin',
+          });
+        } else {
           setAuthStatus({ isLoading: false, isAuthenticated: false, isAdmin: false });
         }
+      } catch {
+        if (isMounted) setAuthStatus({ isLoading: false, isAuthenticated: false, isAdmin: false });
       }
     };
-
     checkAuth();
     return () => { isMounted = false; };
-  }, [location.key]); 
+  }, [location.key]);
 
   if (authStatus.isLoading) {
     return (
@@ -97,40 +118,94 @@ const ProtectedRoute = ({ children }) => {
   }
 
   if (!authStatus.isAuthenticated || !authStatus.isAdmin) {
-    console.log(`ProtectedRoute: Redirection vers /admin (login). Auth: ${authStatus.isAuthenticated}, Admin: ${authStatus.isAdmin}`);
     return <Navigate to="/admin" state={{ from: location }} replace />;
   }
 
-  return children; 
+  return children;
 };
 
-// === Layout pour les Pages Admin ===
 const AdminLayout = () => {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const theme = useTheme();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await apiService.auth.logout?.();
+    } catch {}
+    localStorage.clear();
+    navigate('/admin', { replace: true });
+  };
+
+  const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
+
+  const menuItems = [
+    { label: 'Dashboard', path: '/admin/dashboard', icon: <DashboardIcon /> },
+    { label: 'Artistes', path: '/admin/artists', icon: <PeopleIcon /> },
+    { label: 'SmartLinks', path: '/admin/smartlinks', icon: <LinkIcon /> },
+    { label: 'Landing Pages', path: '/admin/landing-pages', icon: <DashboardIcon /> },
+    { label: 'WordPress', path: '/admin/wordpress', icon: <LinkIcon /> },
+    { label: 'Avis Clients', path: '/admin/reviews', icon: <PeopleIcon /> },
+    { label: 'Statistiques', path: '/admin/stats', icon: <DashboardIcon /> },
+  ];
+
+  const drawer = (
+    <div>
+      <Toolbar><Typography variant="h6">Menu Admin</Typography></Toolbar>
+      <Divider />
+      <List>
+        {menuItems.map(({ label, path, icon }) => (
+          <ListItemButton
+            key={path}
+            component={NavLink}
+            to={path}
+            onClick={() => setMobileOpen(false)}
+            sx={{
+              '&.active': {
+                backgroundColor: theme.palette.primary.main,
+                color: '#fff',
+                '& .MuiListItemIcon-root': { color: '#fff' },
+              },
+            }}
+          >
+            <ListItemIcon>{icon}</ListItemIcon>
+            <ListItemText primary={label} />
+          </ListItemButton>
+        ))}
+      </List>
+    </div>
+  );
+
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      <Box component="nav" sx={{ width: { sm: 240 }, flexShrink: { sm: 0 }, bgcolor: 'background.paper', borderRight: 1, borderColor: 'divider' }}>
-        <Typography variant="h6" sx={{ p: 2 }}>Menu Admin</Typography>
-        {/* TODO: Liens de navigation admin ici (ex: Dashboard, Artistes, SmartLinks) */}
-      </Box>
-      <Box
-        component="main"
-        sx={{ flexGrow: 1, p: 3, width: { sm: `calc(100% - 240px)` } }}
-      >
-        <Outlet /> {/* Rend les composants des sous-routes admin */}
+    <Box sx={{ display: 'flex' }}>
+      <CssBaseline />
+      <AppBar position="fixed" sx={{ width: { sm: `calc(100% - ${drawerWidth}px)` }, ml: { sm: `${drawerWidth}px` } }}>
+        <Toolbar>
+          <IconButton color="inherit" edge="start" onClick={handleDrawerToggle} sx={{ mr: 2, display: { sm: 'none' } }}>
+            <MenuIcon />
+          </IconButton>
+          <Typography variant="h6" sx={{ flexGrow: 1 }}>Panneau d’administration</Typography>
+          <Button color="inherit" startIcon={<LogoutIcon />} onClick={handleLogout}>Déconnexion</Button>
+        </Toolbar>
+      </AppBar>
+
+      <Drawer variant="temporary" open={mobileOpen} onClose={handleDrawerToggle} sx={{ display: { xs: 'block', sm: 'none' }, '& .MuiDrawer-paper': { width: drawerWidth } }}>{drawer}</Drawer>
+      <Drawer variant="permanent" sx={{ display: { xs: 'none', sm: 'block' }, '& .MuiDrawer-paper': { width: drawerWidth } }} open>{drawer}</Drawer>
+
+      <Box component="main" sx={{ flexGrow: 1, p: 3, width: { sm: `calc(100% - ${drawerWidth}px)` }, mt: 8 }}>
+        <Outlet />
       </Box>
     </Box>
   );
 };
 
-// === Composant pour la Page d'Accueil Publique ===
 const HomePage = ({ openSimulator }) => {
   useEffect(() => {
-    console.log("HomePage a été rendu !"); // Log pour vérifier si HomePage est atteint
+    console.log("HomePage rendu");
   }, []);
-
   return (
     <>
-      <Header /> 
+      <Header />
       <main>
         <Hero openSimulator={openSimulator} />
         <Services />
@@ -139,70 +214,58 @@ const HomePage = ({ openSimulator }) => {
         <Reviews />
         <Contact />
       </main>
-      <Footer openSimulator={openSimulator} /> 
+      <Footer openSimulator={openSimulator} />
       <CookieBanner />
     </>
   );
 };
 
-// === Composant Principal de l'Application ===
 function App() {
   const { t, i18n } = useTranslation();
   const simulatorRef = useRef(null);
 
   useEffect(() => {
-    updateMetaTags(t); 
+    updateMetaTags(t);
     const lang = i18n.language.split('-')[0];
     document.documentElement.setAttribute('lang', lang);
     const ogLocaleValue = i18n.language.replace('-', '_');
     const ogLocaleElement = document.querySelector('meta[property="og:locale"]');
-    if (ogLocaleElement) {
-      ogLocaleElement.setAttribute('content', ogLocaleValue);
-    }
+    if (ogLocaleElement) ogLocaleElement.setAttribute('content', ogLocaleValue);
   }, [t, i18n.language]);
 
-  const openSimulator = () => {
-    if (simulatorRef.current) {
-      simulatorRef.current.openSimulator(); 
-    }
-  };
+  const openSimulator = () => simulatorRef.current?.openSimulator();
 
   return (
     <Router>
-      <Simulator ref={simulatorRef} /> 
-
+      <Simulator ref={simulatorRef} />
       <Routes>
-        {/* --- Routes Publiques --- */}
+        {/* Public */}
         <Route path="/" element={<HomePage openSimulator={openSimulator} />} />
         <Route path="/all-reviews" element={<AllReviews />} />
         <Route path="/artists/:slug" element={<ArtistPage />} />
-        <Route path="/admin" element={<AdminLogin />} /> {/* Page de login admin, publique */}
-        <Route path="/smartlinks/:artistSlug/:trackSlug" element={<SmartLinkPage />} /> {/* Page publique SmartLink */}
+        <Route path="/admin" element={<AdminLogin />} />
+        <Route path="/smartlinks/:artistSlug/:trackSlug" element={<SmartLinkPage />} />
 
-        {/* --- Routes Admin Protégées --- */}
-        {/* Ce groupe de routes est protégé. Le path="/admin" ici crée un contexte de chemin. */}
+        {/* Admin */}
         <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
-          {/* path="dashboard" est relatif à "/admin" -> donc "/admin/dashboard" */}
           <Route path="dashboard" element={<AdminPanel />} />
-          {/* La route index n'est plus nécessaire ici si AdminLogin redirige bien vers "dashboard" */}
-          {/* <Route index element={<Navigate to="dashboard" replace />} /> */}
-          
-          <Route path="artists" element={<Outlet />}> {/* Crée un contexte pour /admin/artists */}
-            <Route index element={<ArtistListPage />} /> {/* /admin/artists */}
-            <Route path="new" element={<ArtistCreatePage />} /> {/* /admin/artists/new */}
-            <Route path="edit/:slug" element={<ArtistEditPage />} /> {/* /admin/artists/edit/:slug */}
+          <Route path="artists" element={<Outlet />}>
+            <Route index element={<ArtistListPage />} />
+            <Route path="new" element={<ArtistCreatePage />} />
+            <Route path="edit/:slug" element={<ArtistEditPage />} />
           </Route>
-
-          {/* Routes Smartlinks (à créer et décommenter) */}
-          {/* <Route path="smartlinks" element={<Outlet />}>
+          <Route path="smartlinks" element={<Outlet />}>
             <Route index element={<SmartlinkListPage />} />
             <Route path="new" element={<SmartlinkCreatePage />} />
-            <Route path="edit/:id" element={<SmartlinkEditPage />} />
+            <Route path="edit/:smartlinkId" element={<SmartlinkEditPage />} />
           </Route>
-          */}
+          <Route path="landing-pages" element={<LandingPageGenerator />} />
+          <Route path="wordpress" element={<Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}><WordPressConnector /><WordPressSync /></Box>} />
+          <Route path="reviews" element={<ReviewManager />} />
+          <Route path="stats" element={<CampaignStatsShowcase />} />
         </Route>
 
-        {/* --- Route Catch-all (404 Not Found) --- */}
+        {/* 404 */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
