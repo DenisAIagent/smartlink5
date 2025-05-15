@@ -37,8 +37,8 @@ import { toast } from "react-toastify";
 import { smartLinkSchema } from "@/features/admin/smartlinks/schemas/smartLinkSchema.js";
 import ImageUpload from "@/features/admin/components/ImageUpload.jsx";
 import ArtistCreatePage from "@/pages/admin/artists/ArtistCreatePage.jsx";
-// Modification de l'import pour apiService et artistService
-import apiService, { artistService as importedArtistService } from "@/services/api.service"; 
+// Utilisation directe de apiService.artists pour getAllArtists (qui est en fait getArtists)
+import apiService from "@/services/api.service"; 
 import musicPlatformService from "@/services/musicPlatform.service.js";
 import SmartLinkTemplateSelector from "./SmartLinkTemplateSelector";
 import QRCodeDisplay from "./QRCodeDisplay";
@@ -119,8 +119,8 @@ const SmartLinkForm = ({ smartLinkData = null, onFormSubmitSuccess }) => {
     setLoadingArtists(true);
     setArtistLoadError(null);
     try {
-      // Utilisation de importedArtistService directement
-      const response = await importedArtistService.getAllArtists(); 
+      // Correction: Utilisation de apiService.artists.getArtists()
+      const response = await apiService.artists.getArtists(); 
       if (response && response.success && Array.isArray(response.data)) {
         setArtists(response.data);
       } else {
@@ -134,7 +134,7 @@ const SmartLinkForm = ({ smartLinkData = null, onFormSubmitSuccess }) => {
       console.error("Erreur non interceptée lors du chargement des artistes:", error);
       const errorMessage =
         error.message ||
-        "Impossible de charger la liste des artistes en raison d'une erreur inattendue.";
+        "Impossible de charger la liste des artistes en raison d_une erreur inattendue.";
       toast.error(`Artistes: ${errorMessage}`);
       setArtistLoadError(errorMessage);
       setArtists([]);
@@ -149,57 +149,59 @@ const SmartLinkForm = ({ smartLinkData = null, onFormSubmitSuccess }) => {
 
   const handleImageUploadSuccess = (imageUrl) => {
     setValue("coverImageUrl", imageUrl, { shouldValidate: true, shouldDirty: true });
-    toast.info("Limage de couverture a été mise à jour dans le formulaire.");
+    toast.info("L_image de couverture a été mise à jour dans le formulaire.");
   };
 
+  // Fonctionnalité fetch-platform-links temporairement désactivée car la route backend est manquante (erreur 404)
   const handleFetchLinksFromISRC = async () => {
-    const isrcValue = getValues("isrcUpc");
-    if (!isrcValue || isrcValue.trim() === "") {
-      toast.warn("Veuillez saisir un code ISRC/UPC avant de lancer la recherche.");
-      return;
-    }
-    setIsFetchingLinks(true);
-    toast.info(`Recherche des liens pour l'ISRC/UPC : ${isrcValue}...`);
-    try {
-      const response = await musicPlatformService.fetchLinksFromISRC(isrcValue);
-      if (response && response.success && response.data) {
-        const { title, artist, artwork, linksByPlatform } = response.data;
-        if (title && !getValues("trackTitle")) {
-          setValue("trackTitle", title, { shouldValidate: true, shouldDirty: true });
-        }
+    toast.info("La fonctionnalité d_auto-complétion des liens par ISRC/UPC est temporairement indisponible. Veuillez ajouter les liens manuellement.");
+    // const isrcValue = getValues("isrcUpc");
+    // if (!isrcValue || isrcValue.trim() === "") {
+    //   toast.warn("Veuillez saisir un code ISRC/UPC avant de lancer la recherche.");
+    //   return;
+    // }
+    // setIsFetchingLinks(true);
+    // toast.info(`Recherche des liens pour l_ISRC/UPC : ${isrcValue}...`);
+    // try {
+    //   const response = await musicPlatformService.fetchLinksFromISRC(isrcValue);
+    //   if (response && response.success && response.data) {
+    //     const { title, artist, artwork, linksByPlatform } = response.data;
+    //     if (title && !getValues("trackTitle")) {
+    //       setValue("trackTitle", title, { shouldValidate: true, shouldDirty: true });
+    //     }
 
-        const newPlatformLinks = [];
-        const platformOrder = ["spotify", "appleMusic", "deezer", "youtube"];
+    //     const newPlatformLinks = [];
+    //     const platformOrder = ["spotify", "appleMusic", "deezer", "youtube"];
 
-        platformOrder.forEach(platformKey => {
-          if (linksByPlatform[platformKey]) {
-            let platformName = "";
-            switch (platformKey) {
-              case "spotify": platformName = "Spotify"; break;
-              case "appleMusic": platformName = "Apple Music"; break;
-              case "deezer": platformName = "Deezer"; break;
-              case "youtube": platformName = "YouTube"; break;
-              default: platformName = platformKey;
-            }
-            newPlatformLinks.push({ platform: platformName, url: linksByPlatform[platformKey] });
-          }
-        });
+    //     platformOrder.forEach(platformKey => {
+    //       if (linksByPlatform[platformKey]) {
+    //         let platformName = "";
+    //         switch (platformKey) {
+    //           case "spotify": platformName = "Spotify"; break;
+    //           case "appleMusic": platformName = "Apple Music"; break;
+    //           case "deezer": platformName = "Deezer"; break;
+    //           case "youtube": platformName = "YouTube"; break;
+    //           default: platformName = platformKey;
+    //         }
+    //         newPlatformLinks.push({ platform: platformName, url: linksByPlatform[platformKey] });
+    //       }
+    //     });
         
-        if (newPlatformLinks.length > 0) {
-          replacePlatformLinks(newPlatformLinks);
-          toast.success("Liens des plateformes mis à jour avec succès !");
-        } else {
-          toast.info("Aucun lien trouvé pour cet ISRC/UPC sur les plateformes principales.");
-        }
-      } else {
-        toast.error(response?.error || "Impossible de récupérer les liens pour cet ISRC/UPC.");
-      }
-    } catch (error) {
-      console.error("Erreur lors de la récupération des liens depuis ISRC:", error);
-      toast.error("Une erreur est survenue lors de la recherche des liens.");
-    } finally {
-      setIsFetchingLinks(false);
-    }
+    //     if (newPlatformLinks.length > 0) {
+    //       replacePlatformLinks(newPlatformLinks);
+    //       toast.success("Liens des plateformes mis à jour avec succès !");
+    //     } else {
+    //       toast.info("Aucun lien trouvé pour cet ISRC/UPC sur les plateformes principales.");
+    //     }
+    //   } else {
+    //     toast.error(response?.error || "Impossible de récupérer les liens pour cet ISRC/UPC.");
+    //   }
+    // } catch (error) {
+    //   console.error("Erreur lors de la récupération des liens depuis ISRC:", error);
+    //   toast.error("Une erreur est survenue lors de la recherche des liens.");
+    // } finally {
+    //   setIsFetchingLinks(false);
+    // }
   };
 
   const onSubmitSmartLink = async (data) => {
@@ -297,14 +299,14 @@ const SmartLinkForm = ({ smartLinkData = null, onFormSubmitSuccess }) => {
       } else {
         toast.error(
           responseData?.error ||
-            "Échec de lenregistrement du SmartLink. Veuillez vérifier les informations."
+            "Échec de l_enregistrement du SmartLink. Veuillez vérifier les informations."
         );
       }
     } catch (error) {
       console.error("Erreur non interceptée lors de la soumission du formulaire SmartLink:", error);
       toast.error(
         error.message ||
-          "Une erreur serveur est survenue lors de lenregistrement du SmartLink."
+          "Une erreur serveur est survenue lors de l_enregistrement du SmartLink."
       );
     }
   };
@@ -335,7 +337,7 @@ const SmartLinkForm = ({ smartLinkData = null, onFormSubmitSuccess }) => {
     if (isEditMode && watchedSlug) {
       setCurrentSmartLinkUrl(`${window.location.origin}/s/${watchedSlug}`);
     } else if (!isEditMode) {
-      // Pour la création, lURL nest connue quaprès soumission
+      // Pour la création, l_URL n_est connue qu_après soumission
     }
   }, [watchedSlug, isEditMode]);
 
@@ -389,14 +391,17 @@ const SmartLinkForm = ({ smartLinkData = null, onFormSubmitSuccess }) => {
                     fullWidth 
                     variant="outlined" 
                     error={!!errors.isrcUpc} 
-                    helperText={errors.isrcUpc?.message || "Saisir ISRC/UPC puis cliquer sur l'icône ✨"}
+                    helperText={errors.isrcUpc?.message || "Saisir ISRC/UPC (auto-complétion désactivée)"}
                     InputProps={{
                         endAdornment: (
                           <InputAdornment position="end">
-                            <Tooltip title="Auto-compléter les liens des plateformes (Spotify, Apple Music, Deezer, YouTube) à partir de cet ISRC/UPC.">
-                              <IconButton onClick={handleFetchLinksFromISRC} edge="end" disabled={isFetchingLinks || !watch("isrcUpc")}>
-                                {isFetchingLinks ? <CircularProgress size={24} /> : <AutoAwesomeIcon />}
-                              </IconButton>
+                            {/* Bouton AutoAwesomeIcon désactivé car la route backend fetch-platform-links est manquante */}
+                            <Tooltip title="Auto-complétion des liens temporairement indisponible. Veuillez ajouter les liens manuellement.">
+                              <span> {/* Le span est nécessaire pour que le Tooltip fonctionne sur un bouton désactivé */}
+                                <IconButton onClick={handleFetchLinksFromISRC} edge="end" disabled={true}>
+                                  {isFetchingLinks ? <CircularProgress size={24} /> : <AutoAwesomeIcon />}
+                                </IconButton>
+                              </span>
                             </Tooltip>
                           </InputAdornment>
                         )
@@ -455,7 +460,7 @@ const SmartLinkForm = ({ smartLinkData = null, onFormSubmitSuccess }) => {
                 <Grid item xs={12} md={6}>
                     <TextField 
                         {...register("callToActionLabel")} 
-                        label="Label du Bouton dAction (Optionnel)" 
+                        label="Label du Bouton d_Action (Optionnel)" 
                         fullWidth 
                         variant="outlined" 
                         error={!!errors.callToActionLabel} 
@@ -465,7 +470,7 @@ const SmartLinkForm = ({ smartLinkData = null, onFormSubmitSuccess }) => {
                 <Grid item xs={12} md={6}>
                     <TextField 
                         {...register("callToActionUrl")} 
-                        label="URL du Bouton dAction (Optionnel)" 
+                        label="URL du Bouton d_Action (Optionnel)" 
                         type="url" 
                         fullWidth 
                         variant="outlined" 
@@ -479,7 +484,7 @@ const SmartLinkForm = ({ smartLinkData = null, onFormSubmitSuccess }) => {
           {(watchedTemplateType === "music" || watchedTemplateType === "landing_page") && (
             <Grid item xs={12} md={6}>
               <Typography variant="subtitle2" gutterBottom sx={{ mb: 1 }}>Image de couverture *</Typography>
-              <ImageUpload onUploadSuccess={handleImageUploadSuccess} initialImageUrl={watch("coverImageUrl") || null} buttonText="Télécharger limage" apiUploadFunction={apiService.upload.uploadImage} />
+              <ImageUpload onUploadSuccess={handleImageUploadSuccess} initialImageUrl={watch("coverImageUrl") || null} buttonText="Télécharger l_image" apiUploadFunction={apiService.upload.uploadImage} />
               <input type="hidden" {...register("coverImageUrl")} />
               {errors.coverImageUrl && ( <FormHelperText error sx={{ mt: 1 }}> {errors.coverImageUrl.message} </FormHelperText> )}
             </Grid>
@@ -501,7 +506,7 @@ const SmartLinkForm = ({ smartLinkData = null, onFormSubmitSuccess }) => {
                 <Button type="button" onClick={() => appendPlatformLink({ platform: "", url: "" })} startIcon={<AddCircleOutlineIcon />} variant="outlined" size="small" > Ajouter un lien </Button>
                 {errors.platformLinks && typeof errors.platformLinks === "object" && !Array.isArray(errors.platformLinks) && ( <FormHelperText error sx={{mt:1}}>{errors.platformLinks.message || errors.platformLinks.root?.message}</FormHelperText> )}
                 {watchedTemplateType === "landing_page" && platformLinkFields.length === 0 && (
-                    <FormHelperText sx={{mt:1}}>Aucun lien externe ajouté. Cest optionnel pour les pages de destination.</FormHelperText>
+                    <FormHelperText sx={{mt:1}}>Aucun lien externe ajouté. C_est optionnel pour les pages de destination.</FormHelperText>
                 )}
               </FormControl>
             </Grid>
