@@ -13,8 +13,8 @@ const musicPlatformService = {
         console.log("Frontend: URL Spotify nettoyée des paramètres:", cleanSourceUrl);
       }
       
-      // Appel à la nouvelle route backend qui utilise Odesli/Songlink
-      const response = await apiService.fetchPlatformLinks(cleanSourceUrl);
+      // Correction: Utilisation de apiService.smartlinks.fetchPlatformLinks au lieu de apiService.fetchPlatformLinks
+      const response = await apiService.smartlinks.fetchPlatformLinks(cleanSourceUrl);
       
       console.log("Frontend: Réponse reçue du backend pour fetch-platform-links:", JSON.stringify(response, null, 2));
 
@@ -94,4 +94,3 @@ const musicPlatformService = {
 };
 
 export default musicPlatformService;
-
