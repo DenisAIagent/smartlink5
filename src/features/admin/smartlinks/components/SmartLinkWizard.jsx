@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Container, Grid, Typography, TextField, Button, Paper, Divider, CircularProgress } from '@mui/material';
 import { useForm, Controller } from 'react-hook-form';
 import { toast } from 'react-toastify';
-import musicPlatformService from '../../../services/musicPlatform.service';
+import musicPlatformService from '../../../../services/musicPlatform.service';
 
 // Composants pour chaque section
 import MetadataSection from './sections/MetadataSection';
