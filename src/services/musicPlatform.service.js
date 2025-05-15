@@ -4,8 +4,17 @@ const musicPlatformService = {
   async fetchLinksFromSourceUrl(sourceUrl) {
     console.log(`Frontend: Demande de récupération des liens pour : ${sourceUrl}`);
     try {
+      // Préparation de l'URL pour l'API
+      let cleanSourceUrl = sourceUrl.trim();
+      
+      // Nettoyage des paramètres d'URL pour Spotify
+      if (cleanSourceUrl.includes('?') && cleanSourceUrl.includes('spotify.com')) {
+        cleanSourceUrl = cleanSourceUrl.split('?')[0];
+        console.log("Frontend: URL Spotify nettoyée des paramètres:", cleanSourceUrl);
+      }
+      
       // Appel à la nouvelle route backend qui utilise Odesli/Songlink
-      const response = await apiService.post("/smartlinks/fetch-platform-links", { sourceUrl });
+      const response = await apiService.fetchPlatformLinks(cleanSourceUrl);
       
       console.log("Frontend: Réponse reçue du backend pour fetch-platform-links:", response);
 
@@ -22,17 +31,26 @@ const musicPlatformService = {
         console.log("Frontend: Contenu brut de links:", JSON.stringify(links, null, 2));
         console.log("Frontend: Clés de links:", Object.keys(links));
         
+        // Vérification plus stricte de la présence de liens valides
         const hasLinks = typeof links === 'object' && !Array.isArray(links) && Object.keys(links).length > 0;
         console.log("Frontend: hasLinks:", hasLinks);
         
         if (hasLinks) {
+          // Nettoyage des liens pour supprimer les caractères indésirables
+          const cleanedLinks = {};
+          for (const [platform, url] of Object.entries(links)) {
+            cleanedLinks[platform] = typeof url === 'string' ? url.replace(/;$/, '') : url;
+          }
+          
+          console.log("Frontend: Liens nettoyés:", cleanedLinks);
+          
           return {
             success: true,
             data: {
               title: response.data.title || "",
               artist: response.data.artistName || "",
               artwork: response.data.thumbnailUrl || "",
-              linksByPlatform: links,
+              linksByPlatform: cleanedLinks,
               isrc: sourceUrl.startsWith("ISRC:") ? sourceUrl.substring(5) : "" 
             }
           };
