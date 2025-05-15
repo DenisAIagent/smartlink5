@@ -167,6 +167,17 @@ const SmartLinkForm = ({ smartLinkData = null, onFormSubmitSuccess }) => {
       const response = await musicPlatformService.fetchLinksFromSourceUrl(sourceUrlValue);
       console.log("Frontend: Réponse complète de fetchLinksFromSourceUrl:", JSON.stringify(response, null, 2));
       
+      // Affichage temporaire des liens bruts pour diagnostic
+      if (response && response.success && response.data) {
+        const rawLinks = response.data.linksByPlatform;
+        if (rawLinks && Object.keys(rawLinks).length > 0) {
+          const linksMessage = Object.entries(rawLinks)
+            .map(([platform, url]) => `${platform}: ${url}`)
+            .join('\n');
+          toast.info(`Liens trouvés (diagnostic):\n${linksMessage}`, { autoClose: false });
+        }
+      }
+      
       if (response && response.success && response.data) {
         console.log("Frontend: Structure de response.data:", response.data);
         

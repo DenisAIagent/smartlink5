@@ -16,13 +16,12 @@ const musicPlatformService = {
       // Appel à la nouvelle route backend qui utilise Odesli/Songlink
       const response = await apiService.fetchPlatformLinks(cleanSourceUrl);
       
-      console.log("Frontend: Réponse reçue du backend pour fetch-platform-links:", response);
+      console.log("Frontend: Réponse reçue du backend pour fetch-platform-links:", JSON.stringify(response, null, 2));
 
       if (response && response.success && response.data) {
         // Vérification détaillée de la structure de la réponse
         console.log("Frontend: Structure de response.data:", Object.keys(response.data));
         console.log("Frontend: Type de response.data:", typeof response.data);
-        console.log("Frontend: response.data est-il null?", response.data === null);
         
         // Vérification spécifique pour les liens
         const links = response.data.links || {};
@@ -39,7 +38,9 @@ const musicPlatformService = {
           // Nettoyage des liens pour supprimer les caractères indésirables
           const cleanedLinks = {};
           for (const [platform, url] of Object.entries(links)) {
-            cleanedLinks[platform] = typeof url === 'string' ? url.replace(/;$/, '') : url;
+            // Vérifier si l'URL est une chaîne et nettoyer les points-virgules
+            const cleanUrl = typeof url === 'string' ? url.replace(/;$/, '') : url;
+            cleanedLinks[platform] = cleanUrl;
           }
           
           console.log("Frontend: Liens nettoyés:", cleanedLinks);
