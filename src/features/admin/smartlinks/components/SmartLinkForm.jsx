@@ -24,21 +24,22 @@ import {
   DialogContent,
   DialogTitle,
   DialogActions,
-  InputAdornment, // Ajouté pour le bouton dans le TextField
+  InputAdornment,
 } from "@mui/material";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import AddIcon from "@mui/icons-material/Add";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import PreviewIcon from "@mui/icons-material/Preview";
-import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome"; // Pour le bouton d'auto-complétion
+import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import { toast } from "react-toastify";
 
 import { smartLinkSchema } from "@/features/admin/smartlinks/schemas/smartLinkSchema.js";
 import ImageUpload from "@/features/admin/components/ImageUpload.jsx";
 import ArtistCreatePage from "@/pages/admin/artists/ArtistCreatePage.jsx";
-import apiService from "@/services/api.service";
-import musicPlatformService from "@/services/musicPlatform.service.js"; // Ajout du nouveau service
+// Modification de l'import pour apiService et artistService
+import apiService, { artistService as importedArtistService } from "@/services/api.service"; 
+import musicPlatformService from "@/services/musicPlatform.service.js";
 import SmartLinkTemplateSelector from "./SmartLinkTemplateSelector";
 import QRCodeDisplay from "./QRCodeDisplay";
 import SmartLinkPreview from "./SmartLinkPreview";
@@ -51,7 +52,7 @@ const SmartLinkForm = ({ smartLinkData = null, onFormSubmitSuccess }) => {
   const [isArtistModalOpen, setIsArtistModalOpen] = useState(false);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const [previewData, setPreviewData] = useState(null);
-  const [isFetchingLinks, setIsFetchingLinks] = useState(false); // État pour le chargement des liens auto-complétés
+  const [isFetchingLinks, setIsFetchingLinks] = useState(false);
 
   const [selectedTemplate, setSelectedTemplate] = useState(
     smartLinkData?.templateType || ""
@@ -118,7 +119,8 @@ const SmartLinkForm = ({ smartLinkData = null, onFormSubmitSuccess }) => {
     setLoadingArtists(true);
     setArtistLoadError(null);
     try {
-      const response = await apiService.artists.getAllArtists();
+      // Utilisation de importedArtistService directement
+      const response = await importedArtistService.getAllArtists(); 
       if (response && response.success && Array.isArray(response.data)) {
         setArtists(response.data);
       } else {
@@ -132,7 +134,7 @@ const SmartLinkForm = ({ smartLinkData = null, onFormSubmitSuccess }) => {
       console.error("Erreur non interceptée lors du chargement des artistes:", error);
       const errorMessage =
         error.message ||
-        "Impossible de charger la liste des artistes en raison d\`une erreur inattendue.";
+        "Impossible de charger la liste des artistes en raison d'une erreur inattendue.";
       toast.error(`Artistes: ${errorMessage}`);
       setArtistLoadError(errorMessage);
       setArtists([]);
@@ -157,7 +159,7 @@ const SmartLinkForm = ({ smartLinkData = null, onFormSubmitSuccess }) => {
       return;
     }
     setIsFetchingLinks(true);
-    toast.info(`Recherche des liens pour l\\'ISRC/UPC : ${isrcValue}...`);
+    toast.info(`Recherche des liens pour l'ISRC/UPC : ${isrcValue}...`);
     try {
       const response = await musicPlatformService.fetchLinksFromISRC(isrcValue);
       if (response && response.success && response.data) {
@@ -165,12 +167,9 @@ const SmartLinkForm = ({ smartLinkData = null, onFormSubmitSuccess }) => {
         if (title && !getValues("trackTitle")) {
           setValue("trackTitle", title, { shouldValidate: true, shouldDirty: true });
         }
-        // Note: La gestion de l\\'artiste et de l\\'artwork nécessiterait une logique plus complexe
-        // pour faire correspondre l\\'artiste ou permettre la création/sélection, et pour gérer l\\'upload de l\\'artwork.
-        // Pour l\\'instant, nous nous concentrons sur les liens.
 
         const newPlatformLinks = [];
-        const platformOrder = ["spotify", "appleMusic", "deezer", "youtube"]; // Ordre souhaité
+        const platformOrder = ["spotify", "appleMusic", "deezer", "youtube"];
 
         platformOrder.forEach(platformKey => {
           if (linksByPlatform[platformKey]) {
@@ -187,7 +186,7 @@ const SmartLinkForm = ({ smartLinkData = null, onFormSubmitSuccess }) => {
         });
         
         if (newPlatformLinks.length > 0) {
-          replacePlatformLinks(newPlatformLinks); // Remplace tous les liens existants
+          replacePlatformLinks(newPlatformLinks);
           toast.success("Liens des plateformes mis à jour avec succès !");
         } else {
           toast.info("Aucun lien trouvé pour cet ISRC/UPC sur les plateformes principales.");
@@ -390,7 +389,7 @@ const SmartLinkForm = ({ smartLinkData = null, onFormSubmitSuccess }) => {
                     fullWidth 
                     variant="outlined" 
                     error={!!errors.isrcUpc} 
-                    helperText={errors.isrcUpc?.message || "Saisir ISRC/UPC puis cliquer sur l\\'icône ✨"}
+                    helperText={errors.isrcUpc?.message || "Saisir ISRC/UPC puis cliquer sur l'icône ✨"}
                     InputProps={{
                         endAdornment: (
                           <InputAdornment position="end">
@@ -439,7 +438,6 @@ const SmartLinkForm = ({ smartLinkData = null, onFormSubmitSuccess }) => {
             </Grid>
           )}
 
-          {/* Champs spécifiques pour Landing Page */} 
           {watchedTemplateType === "landing_page" && (
             <>
                 <Grid item xs={12}>
@@ -584,7 +582,6 @@ const SmartLinkForm = ({ smartLinkData = null, onFormSubmitSuccess }) => {
         </DialogContent>
       </Dialog>
 
-      {/* Modale de prévisualisation */} 
       <Dialog open={isPreviewModalOpen} onClose={handleClosePreviewModal} maxWidth="lg" fullWidth>
         <DialogContent sx={{ p:0, "&:first-of-type": { paddingTop: 0 } }}>
           {previewData && <SmartLinkPreview formData={previewData} onClose={handleClosePreviewModal} />}
@@ -596,3 +593,4 @@ const SmartLinkForm = ({ smartLinkData = null, onFormSubmitSuccess }) => {
 };
 
 export default SmartLinkForm;
+
