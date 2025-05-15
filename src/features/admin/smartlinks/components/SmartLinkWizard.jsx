@@ -13,6 +13,14 @@ import CustomizationSection from './sections/CustomizationSection';
 import PreviewSection from './sections/PreviewSection';
 
 const SmartLinkWizard = () => {
+  // Ajout d'un useEffect pour le débogage
+  useEffect(() => {
+    console.log("SmartLinkWizard monté");
+    return () => {
+      console.log("SmartLinkWizard démonté");
+    };
+  }, []);
+
   const [isLoading, setIsLoading] = useState(false);
   const [sourceData, setSourceData] = useState(null);
   const [platformLinks, setPlatformLinks] = useState([]);
@@ -52,6 +60,9 @@ const SmartLinkWizard = () => {
   const fetchLinksFromSource = async (sourceUrl) => {
     setIsLoading(true);
     try {
+      // Ajout de logs pour le débogage
+      console.log("Tentative d'appel à fetchLinksFromSourceUrl avec:", sourceUrl);
+      
       const response = await musicPlatformService.fetchLinksFromSourceUrl(sourceUrl);
       console.log("Réponse de l'API:", response);
       
@@ -118,6 +129,7 @@ const SmartLinkWizard = () => {
     fetchLinksFromSource(sourceUrl);
   };
 
+  // Utilisation d'un rendu simplifié pour le débogage
   return (
     <Container maxWidth="lg">
       <Paper elevation={3} sx={{ p: 4, my: 4 }}>
