@@ -12,16 +12,18 @@ const musicPlatformService = {
       if (response && response.success && response.data) {
         // Vérification détaillée de la structure de la réponse
         console.log("Frontend: Structure de response.data:", Object.keys(response.data));
-        console.log("Frontend: Contenu de response.data.links:", response.data.links);
+        console.log("Frontend: Type de response.data:", typeof response.data);
+        console.log("Frontend: response.data est-il null?", response.data === null);
         
-        // La réponse du backend est attendue sous la forme:
-        // { success: true, data: { title, artistName, thumbnailUrl, links: { Spotify: "url", "Apple Music": "url", ... } } }
-        
-        // Vérifier si links existe et n'est pas vide
+        // Vérification spécifique pour les liens
         const links = response.data.links || {};
-        const hasLinks = Object.keys(links).length > 0;
+        console.log("Frontend: Type de links:", typeof links);
+        console.log("Frontend: links est-il un tableau?", Array.isArray(links));
+        console.log("Frontend: Contenu brut de links:", JSON.stringify(links, null, 2));
+        console.log("Frontend: Clés de links:", Object.keys(links));
         
-        console.log("Frontend: Nombre de liens trouvés:", Object.keys(links).length);
+        const hasLinks = typeof links === 'object' && !Array.isArray(links) && Object.keys(links).length > 0;
+        console.log("Frontend: hasLinks:", hasLinks);
         
         if (hasLinks) {
           return {
@@ -35,8 +37,8 @@ const musicPlatformService = {
             }
           };
         } else {
-          // Cas où links existe mais est vide
-          console.log("Frontend: Aucun lien trouvé dans la réponse");
+          // Cas où links existe mais est vide ou n'a pas la structure attendue
+          console.log("Frontend: Aucun lien trouvé dans la réponse ou structure incorrecte");
           return {
             success: false,
             error: "Aucun lien trouvé pour cette URL/ISRC.",

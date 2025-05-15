@@ -163,27 +163,76 @@ const SmartLinkForm = ({ smartLinkData = null, onFormSubmitSuccess }) => {
     
     try {
       // Utiliser sourceUrlValue pour l_appel
+      console.log("Frontend: Avant appel à fetchLinksFromSourceUrl avec:", sourceUrlValue);
       const response = await musicPlatformService.fetchLinksFromSourceUrl(sourceUrlValue);
+      console.log("Frontend: Réponse complète de fetchLinksFromSourceUrl:", JSON.stringify(response, null, 2));
       
       if (response && response.success && response.data) {
+        console.log("Frontend: Structure de response.data:", response.data);
+        console.log("Frontend: Type de response.data.linksByPlatform:", typeof response.data.linksByPlatform);
+        console.log("Frontend: Contenu de response.data.linksByPlatform:", JSON.stringify(response.data.linksByPlatform, null, 2));
+        
         const { title, artist, artwork, linksByPlatform } = response.data;
         
         if (title && !getValues("trackTitle")) {
           setValue("trackTitle", title, { shouldValidate: true, shouldDirty: true });
+          console.log("Frontend: Titre défini:", title);
         }
 
+        // Vérification détaillée de linksByPlatform
+        console.log("Frontend: linksByPlatform est-il défini?", !!linksByPlatform);
+        console.log("Frontend: linksByPlatform est-il un objet?", typeof linksByPlatform === 'object');
+        console.log("Frontend: linksByPlatform est-il null?", linksByPlatform === null);
+        console.log("Frontend: Clés de linksByPlatform:", linksByPlatform ? Object.keys(linksByPlatform) : "N/A");
+        
         const newPlatformLinks = [];
-        for (const [platform, url] of Object.entries(linksByPlatform)) {
-          newPlatformLinks.push({ platform, url });
+        if (linksByPlatform && typeof linksByPlatform === 'object') {
+          console.log("Frontend: Traitement des liens de plateformes...");
+          console.log("Frontend: Type de linksByPlatform:", typeof linksByPlatform);
+          console.log("Frontend: linksByPlatform est-il un tableau?", Array.isArray(linksByPlatform));
+          console.log("Frontend: Contenu brut de linksByPlatform:", linksByPlatform);
+          
+          // Vérification détaillée de la structure
+          if (Array.isArray(linksByPlatform)) {
+            console.log("Frontend: linksByPlatform est un tableau, conversion en objet...");
+            // Si c'est un tableau, on tente de le convertir en objet
+            const platformObj = {};
+            linksByPlatform.forEach(item => {
+              if (item && item.platform && item.url) {
+                platformObj[item.platform] = item.url;
+              }
+            });
+            
+            for (const [platform, url] of Object.entries(platformObj)) {
+              console.log(`Frontend: Ajout du lien pour ${platform} depuis tableau:`, url);
+              const cleanUrl = typeof url === 'string' ? url.replace(/;$/, '') : url;
+              newPlatformLinks.push({ platform, url: cleanUrl });
+            }
+          } else {
+            // Traitement normal pour un objet
+            for (const [platform, url] of Object.entries(linksByPlatform)) {
+              console.log(`Frontend: Ajout du lien pour ${platform}:`, url);
+              // Vérifier si l'URL est une chaîne et contient des caractères indésirables
+              const cleanUrl = typeof url === 'string' ? url.replace(/;$/, '') : url;
+              newPlatformLinks.push({ platform, url: cleanUrl });
+            }
+          }
         }
         
+        console.log("Frontend: Nombre de nouveaux liens:", newPlatformLinks.length);
+        console.log("Frontend: Détail des nouveaux liens:", JSON.stringify(newPlatformLinks, null, 2));
+        
         if (newPlatformLinks.length > 0) {
+          console.log("Frontend: Avant replacePlatformLinks avec:", JSON.stringify(newPlatformLinks, null, 2));
           replacePlatformLinks(newPlatformLinks);
+          console.log("Frontend: Après replacePlatformLinks");
           toast.success(`${newPlatformLinks.length} liens de plateformes trouvés et ajoutés !`);
         } else {
+          console.log("Frontend: Aucun lien trouvé dans linksByPlatform");
           toast.info("Aucun lien trouvé pour cet ISRC/UPC ou cette URL sur les plateformes principales.");
         }
       } else {
+        console.log("Frontend: Réponse invalide ou échec:", response);
         toast.error(response?.error || "Impossible de récupérer les liens pour cet ISRC/UPC ou cette URL.");
       }
     } catch (error) {
