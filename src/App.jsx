@@ -121,6 +121,7 @@ const AdminLayout = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const theme = useTheme();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = async () => {
     try {
@@ -177,7 +178,7 @@ const AdminLayout = () => {
           <IconButton color="inherit" edge="start" onClick={handleDrawerToggle} sx={{ mr: 2, display: { sm: 'none' } }}>
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" sx={{ flexGrow: 1 }}>Panneau d’administration</Typography>
+          <Typography variant="h6" sx={{ flexGrow: 1 }}>Panneau d'administration</Typography>
           <Button color="inherit" startIcon={<LogoutIcon />} onClick={handleLogout}>Déconnexion</Button>
         </Toolbar>
       </AppBar>
@@ -234,6 +235,7 @@ function App() {
         <Route path="/" element={<HomePage openSimulator={openSimulator} />} />
         <Route path="/all-reviews" element={<AllReviews />} />
         <Route path="/artists/:slug" element={<ArtistPage />} />
+        <Route path="/s/:slug" element={<SmartLinkPage />} />
         <Route path="/smartlinks/:artistSlug/:trackSlug" element={<SmartLinkPage />} />
 
         {/* Admin login */}
@@ -250,6 +252,7 @@ function App() {
           <Route path="smartlinks" element={<Outlet />}>
             <Route index element={<SmartlinkListPage />} />
             <Route path="new" element={<SmartlinkCreatePage />} />
+            <Route path="create" element={<SmartlinkCreatePage />} />
             <Route path="edit/:smartlinkId" element={<SmartlinkEditPage />} />
           </Route>
           <Route path="landing-pages" element={<LandingPageGenerator />} />
@@ -258,8 +261,8 @@ function App() {
           <Route path="stats" element={<CampaignStatsShowcase />} />
         </Route>
 
-        {/* Redirect /admin to /admin/login */}
-        <Route path="/admin" element={<Navigate to="/admin/login" replace />} />
+        {/* Redirect /admin to /admin/dashboard */}
+        <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
 
         {/* 404 */}
         <Route path="*" element={<Navigate to="/" replace />} />
