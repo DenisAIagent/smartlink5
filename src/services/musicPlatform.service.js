@@ -1,63 +1,50 @@
-import apiService from "./api.service"; // Assurez-vous que le chemin est correct
+import apiService from "./api.service";
 
 const musicPlatformService = {
-  async fetchLinksFromISRC(isrc, services = "spotify,apple_music,deezer,youtube") {
-    // Logique pour appeler Musicfetch ou les APIs individuelles
-    // Ceci est un placeholder, la logique réelle d'appel API sera plus complexe
-    // et nécessitera potentiellement un token pour Musicfetch.
-
-    console.log(`Recherche des liens pour ISRC: ${isrc} sur les services: ${services}`);
-
-    // Exemple d'appel à une API fictive (simulant Musicfetch ou autre)
-    // Dans un cas réel, il faudrait gérer l'authentification, les erreurs, etc.
+  async fetchLinksFromSourceUrl(sourceUrl) {
+    console.log(`Frontend: Demande de récupération des liens pour : ${sourceUrl}`);
     try {
-      // Pour l'instant, nous allons simuler une réponse car nous n'avons pas de clé API Musicfetch
-      // et les appels directs à chaque API nécessitent une configuration d'authentification individuelle.
+      // Appel à la nouvelle route backend qui utilise Odesli/Songlink
+      const response = await apiService.post("/smartlinks/fetch-platform-links", { sourceUrl });
       
-      // Idéalement, on appellerait quelque chose comme:
-      // const response = await someHttpClient.get(`https://api.musicfetch.io/isrc?isrc=${isrc}&services=${services}`, {
-      //   headers: { "x-token": "YOUR_MUSICFETCH_TOKEN" }
-      // });
-      // return response.data; // ou un formatage spécifique
+      console.log("Frontend: Réponse reçue du backend pour fetch-platform-links:", response);
 
-      // Simulation de réponse
-      const mockDelay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-      await mockDelay(1500);
-
-      const mockResponse = {
-        success: true,
-        data: {
-          isrc: isrc,
-          title: "Titre Exemple (depuis ISRC)",
-          artist: "Artiste Exemple",
-          artwork: "https://example.com/artwork.jpg",
-          linksByPlatform: {
-            spotify: `https://open.spotify.com/track/isrc_${isrc}_mock_spotify_id`,
-            appleMusic: `https://music.apple.com/us/album/isrc_${isrc}_mock_apple_id`,
-            deezer: `https://www.deezer.com/track/isrc_${isrc}_mock_deezer_id`,
-            youtube: `https://www.youtube.com/watch?v=isrc_${isrc}_mock_youtube_id`,
+      if (response && response.success && response.data) {
+        // La réponse du backend est attendue sous la forme:
+        // { success: true, data: { title, artistName, thumbnailUrl, links: { Spotify: "url", "Apple Music": "url", ... } } }
+        return {
+          success: true,
+          data: {
+            title: response.data.title || "",
+            artist: response.data.artistName || "", // S_assurer que le frontend attend `artist` et non `artistName` si besoin
+            artwork: response.data.thumbnailUrl || "",
+            linksByPlatform: response.data.links || {},
+            // L_ISRC/UPC original n_est pas retourné par Odesli directement de cette manière,
+            // mais le `sourceUrl` initial peut être conservé côté appelant si nécessaire.
+            isrc: sourceUrl.startsWith("ISRC:") ? sourceUrl.substring(5) : "" 
           }
-        }
-      };
-      
-      // Simuler le cas où certains liens ne sont pas trouvés
-      if (isrc === "TEST_ISRC_PARTIAL") {
-        delete mockResponse.data.linksByPlatform.youtube;
-        mockResponse.data.title = "Titre Partiel (ISRC)";
+        };
+      } else {
+        // Gérer les cas où la réponse du backend n_est pas celle attendue ou indique un échec
+        const errorMessage = response && response.message ? response.message : "Réponse invalide ou échec de la récupération des liens depuis le backend.";
+        console.error("Frontend: Erreur ou réponse invalide du backend:", response);
+        return {
+          success: false,
+          error: errorMessage,
+          data: null
+        };
       }
-      if (isrc === "TEST_ISRC_NONE") {
-        mockResponse.data.linksByPlatform = {};
-        mockResponse.data.title = "Titre Non Trouvé (ISRC)";
-      }
-
-      console.log("Réponse simulée de fetchLinksFromISRC:", mockResponse);
-      return mockResponse;
-
     } catch (error) {
-      console.error("Erreur lors de la récupération des liens depuis ISRC:", error);
+      console.error("Frontend: Erreur lors de l_appel à /smartlinks/fetch-platform-links:", error);
+      let errorMessage = "Erreur lors de la récupération des liens musicaux.";
+      if (error.response && error.response.data && error.response.data.error) {
+        errorMessage = error.response.data.error;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
       return {
         success: false,
-        error: error.message || "Erreur lors de la récupération des liens musicaux.",
+        error: errorMessage,
         data: null
       };
     }

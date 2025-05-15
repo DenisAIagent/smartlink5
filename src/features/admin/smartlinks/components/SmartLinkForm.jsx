@@ -1,4 +1,3 @@
-// src/features/admin/smartlinks/components/SmartLinkForm.jsx
 import React, { useState, useEffect, useCallback } from "react";
 import { useForm, Controller, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -37,7 +36,7 @@ import { toast } from "react-toastify";
 import { smartLinkSchema } from "@/features/admin/smartlinks/schemas/smartLinkSchema.js";
 import ImageUpload from "@/features/admin/components/ImageUpload.jsx";
 import ArtistCreatePage from "@/pages/admin/artists/ArtistCreatePage.jsx";
-// Utilisation directe de apiService.artists pour getAllArtists (qui est en fait getArtists)
+// Utilisation directe de apiService.artists pour getArtists
 import apiService from "@/services/api.service"; 
 import musicPlatformService from "@/services/musicPlatform.service.js";
 import SmartLinkTemplateSelector from "./SmartLinkTemplateSelector";
@@ -134,7 +133,7 @@ const SmartLinkForm = ({ smartLinkData = null, onFormSubmitSuccess }) => {
       console.error("Erreur non interceptée lors du chargement des artistes:", error);
       const errorMessage =
         error.message ||
-        "Impossible de charger la liste des artistes en raison d_une erreur inattendue.";
+        "Impossible de charger la liste des artistes en raison d'une erreur inattendue.";
       toast.error(`Artistes: ${errorMessage}`);
       setArtistLoadError(errorMessage);
       setArtists([]);
@@ -149,59 +148,54 @@ const SmartLinkForm = ({ smartLinkData = null, onFormSubmitSuccess }) => {
 
   const handleImageUploadSuccess = (imageUrl) => {
     setValue("coverImageUrl", imageUrl, { shouldValidate: true, shouldDirty: true });
-    toast.info("L_image de couverture a été mise à jour dans le formulaire.");
+    toast.info("L'image de couverture a été mise à jour dans le formulaire.");
   };
 
-  // Fonctionnalité fetch-platform-links temporairement désactivée car la route backend est manquante (erreur 404)
+  // Fonctionnalité fetch-platform-links réactivée avec l'API Odesli/Songlink
   const handleFetchLinksFromISRC = async () => {
-    toast.info("La fonctionnalité d_auto-complétion des liens par ISRC/UPC est temporairement indisponible. Veuillez ajouter les liens manuellement.");
-    // const isrcValue = getValues("isrcUpc");
-    // if (!isrcValue || isrcValue.trim() === "") {
-    //   toast.warn("Veuillez saisir un code ISRC/UPC avant de lancer la recherche.");
-    //   return;
-    // }
-    // setIsFetchingLinks(true);
-    // toast.info(`Recherche des liens pour l_ISRC/UPC : ${isrcValue}...`);
-    // try {
-    //   const response = await musicPlatformService.fetchLinksFromISRC(isrcValue);
-    //   if (response && response.success && response.data) {
-    //     const { title, artist, artwork, linksByPlatform } = response.data;
-    //     if (title && !getValues("trackTitle")) {
-    //       setValue("trackTitle", title, { shouldValidate: true, shouldDirty: true });
-    //     }
-
-    //     const newPlatformLinks = [];
-    //     const platformOrder = ["spotify", "appleMusic", "deezer", "youtube"];
-
-    //     platformOrder.forEach(platformKey => {
-    //       if (linksByPlatform[platformKey]) {
-    //         let platformName = "";
-    //         switch (platformKey) {
-    //           case "spotify": platformName = "Spotify"; break;
-    //           case "appleMusic": platformName = "Apple Music"; break;
-    //           case "deezer": platformName = "Deezer"; break;
-    //           case "youtube": platformName = "YouTube"; break;
-    //           default: platformName = platformKey;
-    //         }
-    //         newPlatformLinks.push({ platform: platformName, url: linksByPlatform[platformKey] });
-    //       }
-    //     });
+    const sourceUrl = getValues("isrcUpc");
+    if (!sourceUrl || sourceUrl.trim() === "") {
+      toast.warn("Veuillez saisir un code ISRC/UPC ou une URL Spotify/Apple Music/Deezer avant de lancer la recherche.");
+      return;
+    }
+    
+    setIsFetchingLinks(true);
+    toast.info(`Recherche des liens pour : ${sourceUrl}...`);
+    
+    try {
+      const response = await musicPlatformService.fetchLinksFromSourceUrl(sourceUrl);
+      
+      if (response && response.success && response.data) {
+        const { title, artist, artwork, linksByPlatform } = response.data;
         
-    //     if (newPlatformLinks.length > 0) {
-    //       replacePlatformLinks(newPlatformLinks);
-    //       toast.success("Liens des plateformes mis à jour avec succès !");
-    //     } else {
-    //       toast.info("Aucun lien trouvé pour cet ISRC/UPC sur les plateformes principales.");
-    //     }
-    //   } else {
-    //     toast.error(response?.error || "Impossible de récupérer les liens pour cet ISRC/UPC.");
-    //   }
-    // } catch (error) {
-    //   console.error("Erreur lors de la récupération des liens depuis ISRC:", error);
-    //   toast.error("Une erreur est survenue lors de la recherche des liens.");
-    // } finally {
-    //   setIsFetchingLinks(false);
-    // }
+        // Mise à jour du titre si disponible et non déjà renseigné
+        if (title && !getValues("trackTitle")) {
+          setValue("trackTitle", title, { shouldValidate: true, shouldDirty: true });
+        }
+
+        // Conversion des liens par plateforme en format attendu par le formulaire
+        const newPlatformLinks = [];
+        
+        // Parcourir les liens retournés et les formater pour le formulaire
+        for (const [platform, url] of Object.entries(linksByPlatform)) {
+          newPlatformLinks.push({ platform, url });
+        }
+        
+        if (newPlatformLinks.length > 0) {
+          replacePlatformLinks(newPlatformLinks);
+          toast.success(`${newPlatformLinks.length} liens de plateformes trouvés et ajoutés !`);
+        } else {
+          toast.info("Aucun lien trouvé pour cet ISRC/UPC ou cette URL sur les plateformes principales.");
+        }
+      } else {
+        toast.error(response?.error || "Impossible de récupérer les liens pour cet ISRC/UPC ou cette URL.");
+      }
+    } catch (error) {
+      console.error("Erreur lors de la récupération des liens:", error);
+      toast.error("Une erreur est survenue lors de la recherche des liens.");
+    } finally {
+      setIsFetchingLinks(false);
+    }
   };
 
   const onSubmitSmartLink = async (data) => {
@@ -299,14 +293,14 @@ const SmartLinkForm = ({ smartLinkData = null, onFormSubmitSuccess }) => {
       } else {
         toast.error(
           responseData?.error ||
-            "Échec de l_enregistrement du SmartLink. Veuillez vérifier les informations."
+            "Échec de l'enregistrement du SmartLink. Veuillez vérifier les informations."
         );
       }
     } catch (error) {
       console.error("Erreur non interceptée lors de la soumission du formulaire SmartLink:", error);
       toast.error(
         error.message ||
-          "Une erreur serveur est survenue lors de l_enregistrement du SmartLink."
+          "Une erreur serveur est survenue lors de l'enregistrement du SmartLink."
       );
     }
   };
@@ -337,7 +331,7 @@ const SmartLinkForm = ({ smartLinkData = null, onFormSubmitSuccess }) => {
     if (isEditMode && watchedSlug) {
       setCurrentSmartLinkUrl(`${window.location.origin}/s/${watchedSlug}`);
     } else if (!isEditMode) {
-      // Pour la création, l_URL n_est connue qu_après soumission
+      // Pour la création, l'URL n'est connue qu'après soumission
     }
   }, [watchedSlug, isEditMode]);
 
@@ -387,215 +381,440 @@ const SmartLinkForm = ({ smartLinkData = null, onFormSubmitSuccess }) => {
              <Grid item xs={12} md={6}>
                 <TextField 
                     {...register("isrcUpc")} 
-                    label="ISRC / UPC"
+                    label="ISRC / UPC ou URL Spotify/Apple Music/Deezer"
                     fullWidth 
                     variant="outlined" 
                     error={!!errors.isrcUpc} 
-                    helperText={errors.isrcUpc?.message || "Saisir ISRC/UPC (auto-complétion désactivée)"}
+                    helperText={errors.isrcUpc?.message || "Saisir un ISRC/UPC ou une URL de plateforme pour l'auto-complétion"}
                     InputProps={{
                         endAdornment: (
                           <InputAdornment position="end">
-                            {/* Bouton AutoAwesomeIcon désactivé car la route backend fetch-platform-links est manquante */}
-                            <Tooltip title="Auto-complétion des liens temporairement indisponible. Veuillez ajouter les liens manuellement.">
-                              <span> {/* Le span est nécessaire pour que le Tooltip fonctionne sur un bouton désactivé */}
-                                <IconButton onClick={handleFetchLinksFromISRC} edge="end" disabled={true}>
-                                  {isFetchingLinks ? <CircularProgress size={24} /> : <AutoAwesomeIcon />}
-                                </IconButton>
-                              </span>
+                            <Tooltip title="Rechercher automatiquement les liens des plateformes à partir de l'ISRC/UPC ou d'une URL">
+                              <IconButton
+                                onClick={handleFetchLinksFromISRC}
+                                disabled={isFetchingLinks}
+                                edge="end"
+                                color="primary"
+                              >
+                                {isFetchingLinks ? <CircularProgress size={24} /> : <AutoAwesomeIcon />}
+                              </IconButton>
                             </Tooltip>
                           </InputAdornment>
-                        )
+                        ),
                     }}
                 />
             </Grid>
           )}
 
-          {(watchedTemplateType === "music" || watchedTemplateType === "landing_page") && (
-            <Grid item xs={12} md={watchedTemplateType === "music" ? 12 : 6}> 
-              <TextField {...register("slug")} label="Slug (URL personnalisée)" fullWidth variant="outlined" error={!!errors.slug} helperText={errors.slug?.message || "Ex: mon-nouveau-single. Laisser vide pour auto-génération."}/>
-            </Grid>
-          )}
+          <Grid item xs={12} md={6}>
+            <FormControl fullWidth error={!!errors.artistId} required>
+              <InputLabel id="artist-select-label">Artiste</InputLabel>
+              <Controller
+                name="artistId"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    {...field}
+                    labelId="artist-select-label"
+                    label="Artiste"
+                    disabled={loadingArtists}
+                    endAdornment={
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={handleOpenArtistModal}
+                          edge="end"
+                          sx={{ mr: 2 }}
+                          title="Créer un nouvel artiste"
+                        >
+                          <AddIcon />
+                        </IconButton>
+                      </InputAdornment>
+                    }
+                  >
+                    {loadingArtists ? (
+                      <MenuItem disabled>Chargement des artistes...</MenuItem>
+                    ) : artistLoadError ? (
+                      <MenuItem disabled>Erreur: {artistLoadError}</MenuItem>
+                    ) : artists.length === 0 ? (
+                      <MenuItem disabled>Aucun artiste disponible</MenuItem>
+                    ) : (
+                      artists.map((artist) => (
+                        <MenuItem key={artist._id} value={artist._id}>
+                          {artist.name}
+                        </MenuItem>
+                      ))
+                    )}
+                  </Select>
+                )}
+              />
+              {errors.artistId && (
+                <FormHelperText>{errors.artistId.message}</FormHelperText>
+              )}
+            </FormControl>
+          </Grid>
 
-          {(watchedTemplateType === "music" || watchedTemplateType === "landing_page") && (
-            <Grid item xs={12} md={5}>
-              <FormControl fullWidth required error={!!errors.artistId || !!artistLoadError}>
-                <InputLabel id="artist-select-label">Artiste *</InputLabel>
-                <Controller name="artistId" control={control} render={({ field }) => (
-                    <Select labelId="artist-select-label" label="Artiste *" {...field} disabled={loadingArtists}>
-                      {loadingArtists && ( <MenuItem value="" disabled><em>Chargement... <CircularProgress size={16} sx={{ ml: 1 }} /></em></MenuItem> )}
-                      {!loadingArtists && artists.length === 0 && !artistLoadError && ( <MenuItem value="" disabled><em>Aucun artiste. Créez-en un.</em></MenuItem> )}
-                      {!loadingArtists && artistLoadError && ( <MenuItem value="" disabled><em>Erreur chargement artistes.</em></MenuItem> )}
-                      {!loadingArtists && artists.map((artist) => ( <MenuItem key={artist._id} value={artist._id}>{artist.name}</MenuItem> ))}
-                    </Select>
-                )}/>
-                {errors.artistId && (<FormHelperText>{errors.artistId.message}</FormHelperText>)}
-                {artistLoadError && (<FormHelperText error>{artistLoadError}</FormHelperText>)}
-              </FormControl>
-              <Button variant="text" startIcon={<AddIcon />} onClick={handleOpenArtistModal} sx={{ mt: 0.5, textTransform: "none" }} disabled={loadingArtists}>
-                Nouvel artiste
-              </Button>
-            </Grid>
-          )}
-          
-          {watchedTemplateType === "music" && (
-            <Grid item xs={12} md={7}>
-              <Controller name="releaseDate" control={control} render={({ field }) => ( <TextField label="Date de sortie (Optionnel)" type="date" fullWidth variant="outlined" value={ field.value ? new Date(field.value).toISOString().split("T")[0] : "" } onChange={(e) => { const dateValue = e.target.value ? new Date(e.target.value+"T00:00:00Z") : null; field.onChange( dateValue && !isNaN(dateValue.getTime()) ? dateValue : null ); }} error={!!errors.releaseDate} helperText={errors.releaseDate?.message} InputLabelProps={{ shrink: true }} /> )}/>
-            </Grid>
-          )}
+          <Grid item xs={12} md={6}>
+            <TextField
+              {...register("slug")}
+              label="Slug personnalisé (optionnel)"
+              fullWidth
+              variant="outlined"
+              error={!!errors.slug}
+              helperText={
+                errors.slug?.message ||
+                "Laissez vide pour générer automatiquement à partir du titre"
+              }
+            />
+          </Grid>
+
+          <Grid item xs={12} md={6}>
+            <TextField
+              {...register("releaseDate")}
+              label="Date de sortie"
+              type="date"
+              fullWidth
+              variant="outlined"
+              InputLabelProps={{ shrink: true }}
+              error={!!errors.releaseDate}
+              helperText={errors.releaseDate?.message}
+            />
+          </Grid>
+
+          <Grid item xs={12} md={6}>
+            <ImageUpload
+              currentImageUrl={watch("coverImageUrl")}
+              onUploadSuccess={handleImageUploadSuccess}
+              label="Image de couverture"
+              error={!!errors.coverImageUrl}
+              helperText={errors.coverImageUrl?.message}
+            />
+          </Grid>
+
+          <Grid item xs={12}>
+            <TextField
+              {...register("description")}
+              label="Description"
+              multiline
+              rows={3}
+              fullWidth
+              variant="outlined"
+              error={!!errors.description}
+              helperText={
+                errors.description?.message ||
+                "Description optionnelle du SmartLink (max 500 caractères)"
+              }
+            />
+          </Grid>
 
           {watchedTemplateType === "landing_page" && (
             <>
-                <Grid item xs={12}>
-                    <TextField 
-                        {...register("pageContent")} 
-                        label="Contenu de la page (Optionnel)" 
-                        multiline 
-                        rows={6} 
-                        fullWidth 
-                        variant="outlined" 
-                        error={!!errors.pageContent} 
-                        helperText={errors.pageContent?.message || "Décrivez le contenu principal de votre page de destination ici."}
-                    />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                    <TextField 
-                        {...register("callToActionLabel")} 
-                        label="Label du Bouton d_Action (Optionnel)" 
-                        fullWidth 
-                        variant="outlined" 
-                        error={!!errors.callToActionLabel} 
-                        helperText={errors.callToActionLabel?.message || "Ex: En savoir plus, Acheter maintenant"}
-                    />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                    <TextField 
-                        {...register("callToActionUrl")} 
-                        label="URL du Bouton d_Action (Optionnel)" 
-                        type="url" 
-                        fullWidth 
-                        variant="outlined" 
-                        error={!!errors.callToActionUrl} 
-                        helperText={errors.callToActionUrl?.message || "Lien vers lequel le bouton redirigera."}
-                    />
-                </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  {...register("pageContent")}
+                  label="Contenu de la page"
+                  multiline
+                  rows={4}
+                  fullWidth
+                  variant="outlined"
+                  error={!!errors.pageContent}
+                  helperText={
+                    errors.pageContent?.message ||
+                    "Contenu principal de la landing page (supporte le HTML basique)"
+                  }
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  {...register("callToActionLabel")}
+                  label="Texte du bouton d'action"
+                  fullWidth
+                  variant="outlined"
+                  error={!!errors.callToActionLabel}
+                  helperText={errors.callToActionLabel?.message}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  {...register("callToActionUrl")}
+                  label="URL du bouton d'action"
+                  fullWidth
+                  variant="outlined"
+                  error={!!errors.callToActionUrl}
+                  helperText={errors.callToActionUrl?.message}
+                />
+              </Grid>
             </>
           )}
 
-          {(watchedTemplateType === "music" || watchedTemplateType === "landing_page") && (
-            <Grid item xs={12} md={6}>
-              <Typography variant="subtitle2" gutterBottom sx={{ mb: 1 }}>Image de couverture *</Typography>
-              <ImageUpload onUploadSuccess={handleImageUploadSuccess} initialImageUrl={watch("coverImageUrl") || null} buttonText="Télécharger l_image" apiUploadFunction={apiService.upload.uploadImage} />
-              <input type="hidden" {...register("coverImageUrl")} />
-              {errors.coverImageUrl && ( <FormHelperText error sx={{ mt: 1 }}> {errors.coverImageUrl.message} </FormHelperText> )}
-            </Grid>
-          )}
+          <Grid item xs={12}>
+            <Typography variant="h6" gutterBottom>
+              Liens des plateformes
+            </Typography>
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="body2" color="text.secondary">
+                Ajoutez les liens vers les différentes plateformes de streaming.
+              </Typography>
+            </Box>
 
-          {(watchedTemplateType === "music" || watchedTemplateType === "landing_page") && (
-            <Grid item xs={12} md={6}>
-              <TextField {...register("description")} label="Description (Optionnel)" multiline rows={4} fullWidth variant="outlined" error={!!errors.description} helperText={errors.description?.message} />
-            </Grid>
-          )}
-
-          {(watchedTemplateType === "music" || watchedTemplateType === "landing_page") && (
-            <Grid item xs={12}>
-              <FormControl component="fieldset" fullWidth margin="normal">
-                <FormLabel component="legend" sx={{ mb: 1.5, fontWeight: "medium", fontSize: "1.1rem" }}> 
-                    {watchedTemplateType === "music" ? "Liens des plateformes de streaming *" : "Liens externes (Optionnel)"}
-                </FormLabel>
-                {platformLinkFields.map((item, index) => ( <Grid container spacing={1.5} key={item.id} sx={{ mb: 2, alignItems: "flex-start" }}> <Grid item xs={12} sm={5}> <Controller name={`platformLinks.${index}.platform`} control={control} render={({ field }) => ( <TextField {...field} label="Nom du lien / Plateforme" variant="outlined" fullWidth size="small" error={!!errors.platformLinks?.[index]?.platform} helperText={errors.platformLinks?.[index]?.platform?.message} /> )}/> </Grid> <Grid item xs={12} sm={6}> <Controller name={`platformLinks.${index}.url`} control={control} render={({ field }) => ( <TextField {...field} label="URL du lien" variant="outlined" fullWidth type="url" size="small" error={!!errors.platformLinks?.[index]?.url} helperText={errors.platformLinks?.[index]?.url?.message} /> )}/> </Grid> <Grid item xs={12} sm={1} sx={{ textAlign: {xs: "right", sm: "left"}, pt: {xs: 1, sm: 0.5} }}> <Tooltip title="Supprimer ce lien"> <IconButton onClick={() => removePlatformLink(index)} color="error" size="small" disabled={platformLinkFields.length <= 1 && watchedTemplateType === "music"}> <RemoveCircleOutlineIcon /> </IconButton> </Tooltip> </Grid> </Grid> ))}
-                <Button type="button" onClick={() => appendPlatformLink({ platform: "", url: "" })} startIcon={<AddCircleOutlineIcon />} variant="outlined" size="small" > Ajouter un lien </Button>
-                {errors.platformLinks && typeof errors.platformLinks === "object" && !Array.isArray(errors.platformLinks) && ( <FormHelperText error sx={{mt:1}}>{errors.platformLinks.message || errors.platformLinks.root?.message}</FormHelperText> )}
-                {watchedTemplateType === "landing_page" && platformLinkFields.length === 0 && (
-                    <FormHelperText sx={{mt:1}}>Aucun lien externe ajouté. C_est optionnel pour les pages de destination.</FormHelperText>
-                )}
-              </FormControl>
-            </Grid>
-          )}
-          
-          {watchedTemplateType && (
-            <>
-              <Grid item xs={12}>
-                <FormControl component="fieldset" fullWidth margin="normal">
-                  <FormLabel component="legend" sx={{ mb: 1.5, fontWeight: "medium", fontSize: "1.1rem" }}> Pixels de Tracking (Optionnel) </FormLabel>
-                  <Grid container spacing={2}> <Grid item xs={12} sm={6}> <TextField {...register("trackingIds.ga4Id")} label="Google Analytics 4 ID (GA4)" fullWidth variant="outlined" error={!!errors.trackingIds?.ga4Id} helperText={errors.trackingIds?.ga4Id?.message} /> </Grid> <Grid item xs={12} sm={6}> <TextField {...register("trackingIds.gtmId")} label="Google Tag Manager ID (GTM)" fullWidth variant="outlined" error={!!errors.trackingIds?.gtmId} helperText={errors.trackingIds?.gtmId?.message} /> </Grid> <Grid item xs={12} sm={6}> <TextField {...register("trackingIds.metaPixelId")} label="Meta Pixel ID (Facebook/Instagram)" fullWidth variant="outlined" error={!!errors.trackingIds?.metaPixelId} helperText={errors.trackingIds?.metaPixelId?.message} /> </Grid> <Grid item xs={12} sm={6}> <TextField {...register("trackingIds.tiktokPixelId")} label="TikTok Pixel ID" fullWidth variant="outlined" error={!!errors.trackingIds?.tiktokPixelId} helperText={errors.trackingIds?.tiktokPixelId?.message} /> </Grid> </Grid>
-                </FormControl>
-              </Grid>
-              
-              <Grid item xs={12}>
-                <FormControl component="fieldset" fullWidth margin="normal">
-                  <FormLabel component="legend" sx={{ mb: 1.5, fontWeight: "medium", fontSize: "1.1rem" }}> Paramètres UTM (Optionnel) </FormLabel>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6} md={4}>
-                      <TextField {...register("utmSource")} label="UTM Source" fullWidth variant="outlined" error={!!errors.utmSource} helperText={errors.utmSource?.message} />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={4}>
-                      <TextField {...register("utmMedium")} label="UTM Medium" fullWidth variant="outlined" error={!!errors.utmMedium} helperText={errors.utmMedium?.message} />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={4}>
-                      <TextField {...register("utmCampaign")} label="UTM Campaign" fullWidth variant="outlined" error={!!errors.utmCampaign} helperText={errors.utmCampaign?.message} />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={6}>
-                      <TextField {...register("utmTerm")} label="UTM Term" fullWidth variant="outlined" error={!!errors.utmTerm} helperText={errors.utmTerm?.message} />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={6}>
-                      <TextField {...register("utmContent")} label="UTM Content" fullWidth variant="outlined" error={!!errors.utmContent} helperText={errors.utmContent?.message} />
-                    </Grid>
-                  </Grid>
-                </FormControl>
-              </Grid>
-
-              <Grid item xs={12}>
-                <FormControlLabel control={ <Controller name="isPublished" control={control} render={({ field }) => ( <Switch {...field} checked={field.value} color="primary" /> )} /> } label="Publier ce SmartLink (le rendre accessible publiquement)" />
-                {errors.isPublished && ( <FormHelperText error> {errors.isPublished.message} </FormHelperText> )}
-              </Grid>
-
-              <Grid item xs={12} sx={{ mt: 3, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <Button 
-                  variant="outlined" 
-                  color="info" 
-                  onClick={handleOpenPreviewModal} 
-                  startIcon={<PreviewIcon />} 
-                  disabled={!watchedTemplateType || isSmartLinkSubmitting}
-                  sx={{ minWidth: { xs: "calc(50% - 8px)", sm: 180 }, py: 1.5 }}
+            {platformLinkFields.map((field, index) => (
+              <Grid container spacing={2} key={field.id} sx={{ mb: 2 }}>
+                <Grid item xs={12} sm={5}>
+                  <Controller
+                    name={`platformLinks.${index}.platform`}
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="Nom de la plateforme"
+                        fullWidth
+                        variant="outlined"
+                        error={!!errors.platformLinks?.[index]?.platform}
+                        helperText={errors.platformLinks?.[index]?.platform?.message}
+                      />
+                    )}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Controller
+                    name={`platformLinks.${index}.url`}
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="URL"
+                        fullWidth
+                        variant="outlined"
+                        error={!!errors.platformLinks?.[index]?.url}
+                        helperText={errors.platformLinks?.[index]?.url?.message}
+                      />
+                    )}
+                  />
+                </Grid>
+                <Grid
+                  item
+                  xs={12}
+                  sm={1}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
                 >
-                  Prévisualiser
-                </Button>
-                <Button 
-                  type="submit" 
-                  variant="contained" 
-                  color="primary" 
-                  disabled={isSmartLinkSubmitting || loadingArtists || !watchedTemplateType} 
-                  startIcon={isSmartLinkSubmitting ? <CircularProgress size={20} color="inherit" /> : null} 
-                  sx={{ minWidth: { xs: "calc(50% - 8px)", sm: 180 }, py: 1.5 }}
-                >
-                  {isSmartLinkSubmitting ? "Enregistrement..." : isEditMode ? "Mettre à jour" : "Créer SmartLink"}
-                </Button>
+                  <IconButton
+                    onClick={() => removePlatformLink(index)}
+                    color="error"
+                    disabled={platformLinkFields.length === 1}
+                  >
+                    <RemoveCircleOutlineIcon />
+                  </IconButton>
+                </Grid>
               </Grid>
-            </>
-          )}
+            ))}
+
+            <Button
+              startIcon={<AddCircleOutlineIcon />}
+              onClick={() => appendPlatformLink({ platform: "", url: "" })}
+              variant="outlined"
+              color="primary"
+              sx={{ mt: 1 }}
+            >
+              Ajouter une plateforme
+            </Button>
+          </Grid>
+
+          <Grid item xs={12}>
+            <Typography variant="h6" gutterBottom>
+              Paramètres de tracking (optionnels)
+            </Typography>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6} md={3}>
+                <TextField
+                  {...register("trackingIds.ga4Id")}
+                  label="ID Google Analytics 4"
+                  fullWidth
+                  variant="outlined"
+                  error={!!errors.trackingIds?.ga4Id}
+                  helperText={errors.trackingIds?.ga4Id?.message}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <TextField
+                  {...register("trackingIds.gtmId")}
+                  label="ID Google Tag Manager"
+                  fullWidth
+                  variant="outlined"
+                  error={!!errors.trackingIds?.gtmId}
+                  helperText={errors.trackingIds?.gtmId?.message}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <TextField
+                  {...register("trackingIds.metaPixelId")}
+                  label="ID Meta Pixel"
+                  fullWidth
+                  variant="outlined"
+                  error={!!errors.trackingIds?.metaPixelId}
+                  helperText={errors.trackingIds?.metaPixelId?.message}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <TextField
+                  {...register("trackingIds.tiktokPixelId")}
+                  label="ID TikTok Pixel"
+                  fullWidth
+                  variant="outlined"
+                  error={!!errors.trackingIds?.tiktokPixelId}
+                  helperText={errors.trackingIds?.tiktokPixelId?.message}
+                />
+              </Grid>
+            </Grid>
+          </Grid>
+
+          <Grid item xs={12}>
+            <Typography variant="h6" gutterBottom>
+              Paramètres UTM (optionnels)
+            </Typography>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6} md={4}>
+                <TextField
+                  {...register("utmSource")}
+                  label="utm_source"
+                  fullWidth
+                  variant="outlined"
+                  error={!!errors.utmSource}
+                  helperText={errors.utmSource?.message}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <TextField
+                  {...register("utmMedium")}
+                  label="utm_medium"
+                  fullWidth
+                  variant="outlined"
+                  error={!!errors.utmMedium}
+                  helperText={errors.utmMedium?.message}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <TextField
+                  {...register("utmCampaign")}
+                  label="utm_campaign"
+                  fullWidth
+                  variant="outlined"
+                  error={!!errors.utmCampaign}
+                  helperText={errors.utmCampaign?.message}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={6}>
+                <TextField
+                  {...register("utmTerm")}
+                  label="utm_term"
+                  fullWidth
+                  variant="outlined"
+                  error={!!errors.utmTerm}
+                  helperText={errors.utmTerm?.message}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={6}>
+                <TextField
+                  {...register("utmContent")}
+                  label="utm_content"
+                  fullWidth
+                  variant="outlined"
+                  error={!!errors.utmContent}
+                  helperText={errors.utmContent?.message}
+                />
+              </Grid>
+            </Grid>
+          </Grid>
+
+          <Grid item xs={12}>
+            <FormControlLabel
+              control={
+                <Controller
+                  name="isPublished"
+                  control={control}
+                  render={({ field }) => (
+                    <Switch
+                      checked={field.value}
+                      onChange={(e) => field.onChange(e.target.checked)}
+                    />
+                  )}
+                />
+              }
+              label="Publier ce SmartLink"
+            />
+          </Grid>
+
+          <Grid item xs={12} sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={handleOpenPreviewModal}
+              startIcon={<PreviewIcon />}
+              disabled={isSmartLinkSubmitting}
+            >
+              Prévisualiser
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              disabled={isSmartLinkSubmitting}
+              sx={{ minWidth: 120 }}
+            >
+              {isSmartLinkSubmitting ? (
+                <CircularProgress size={24} />
+              ) : isEditMode ? (
+                "Mettre à jour"
+              ) : (
+                "Créer"
+              )}
+            </Button>
+          </Grid>
         </Grid>
       </form>
 
-      <Dialog open={isArtistModalOpen} onClose={handleCloseArtistModal} maxWidth="md" fullWidth>
+      {/* Modal pour créer un nouvel artiste */}
+      <Dialog
+        open={isArtistModalOpen}
+        onClose={handleCloseArtistModal}
+        maxWidth="md"
+        fullWidth
+      >
         <DialogTitle>Créer un nouvel artiste</DialogTitle>
-        <DialogContent sx={{pt:0.5}}>
+        <DialogContent>
           <ArtistCreatePage
-            isInModal={true}
-            onSuccessInModal={handleArtistCreatedInModal}
-            onCancelInModal={handleCloseArtistModal}
+            onArtistCreated={handleArtistCreatedInModal}
+            isModal={true}
           />
         </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseArtistModal} color="primary">
+            Fermer
+          </Button>
+        </DialogActions>
       </Dialog>
 
-      <Dialog open={isPreviewModalOpen} onClose={handleClosePreviewModal} maxWidth="lg" fullWidth>
-        <DialogContent sx={{ p:0, "&:first-of-type": { paddingTop: 0 } }}>
-          {previewData && <SmartLinkPreview formData={previewData} onClose={handleClosePreviewModal} />}
+      {/* Modal de prévisualisation */}
+      <Dialog
+        open={isPreviewModalOpen}
+        onClose={handleClosePreviewModal}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>Prévisualisation du SmartLink</DialogTitle>
+        <DialogContent>
+          {previewData && <SmartLinkPreview data={previewData} artists={artists} />}
         </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClosePreviewModal} color="primary">
+            Fermer
+          </Button>
+        </DialogActions>
       </Dialog>
-
     </Paper>
   );
 };
 
 export default SmartLinkForm;
-
