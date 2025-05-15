@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Container, Typography } from '@mui/material';
 import SmartLinkWizard from '../../../features/admin/smartlinks/components/SmartLinkWizard';
-import AdminLayout from '../../../components/layouts/AdminLayout';
+import AdminLayout from '../../../components/admin/AdminLayout';
 
 const SmartlinkCreatePage = () => {
   return (
