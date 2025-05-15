@@ -80,7 +80,7 @@ export const smartLinkService = {
     apiClient.post(`/smartlinks/${smartlinkId}/log-platform-click`, platformData), // POST /api/smartlinks/:id/log-platform-click
 
   // Nouvelle méthode pour auto-fetch des liens de plateformes
-  fetchPlatformLinks: async (url) => apiClient.post('/smartlinks/fetch-platform-links', { url }),
+  fetchPlatformLinks: async (sourceUrl) => apiClient.post('/smartlinks/fetch-platform-links', { sourceUrl }),
 };
 
 // --- Service pour les Artistes ---
