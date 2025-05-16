@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography, Grid, TextField, FormControl, InputLabel, Select, MenuItem, Slider, ColorPicker } from '@mui/material';
+import { Box, Typography, Grid, TextField, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { Controller } from 'react-hook-form';
 
 const CustomizationSection = ({ control }) => {
@@ -53,22 +53,7 @@ const CustomizationSection = ({ control }) => {
           />
         </Grid>
         
-        <Grid item xs={12}>
-          <Controller
-            name="ctaText"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                label="Texte d'appel à l'action"
-                variant="outlined"
-                fullWidth
-                placeholder="ex: Écouter maintenant"
-                helperText="Ce texte sera affiché sur les boutons des plateformes"
-              />
-            )}
-          />
-        </Grid>
+        {/* Suppression du champ ctaText puisque nous n'affichons plus de texte sur les boutons */}
         
         <Grid item xs={12}>
           <Typography variant="subtitle2" gutterBottom>

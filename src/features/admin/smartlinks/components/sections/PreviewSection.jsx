@@ -36,20 +36,19 @@ const SmartLinkContent = styled(Box)(({ theme, primaryColor }) => ({
   backgroundColor: '#f5f5f5',
 }));
 
-// Composant pour le bouton de plateforme
-const PlatformButton = styled(Box)(({ theme, primaryColor }) => ({
-  backgroundColor: primaryColor || theme.palette.primary.main,
-  color: 'white',
-  padding: '12px 16px',
-  borderRadius: 8,
-  margin: '8px 0',
-  display: 'flex',
+// Composant pour l'icône de plateforme (logo uniquement, sans texte)
+const PlatformIcon = styled(Box)(({ theme, primaryColor }) => ({
+  backgroundColor: 'transparent',
+  padding: '12px',
+  margin: '8px 10px',
+  display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
   cursor: 'pointer',
   transition: 'all 0.2s ease',
+  borderRadius: '50%',
   '&:hover': {
-    opacity: 0.9,
+    backgroundColor: 'rgba(0,0,0,0.05)',
     transform: 'translateY(-2px)',
   },
 }));
@@ -91,7 +90,6 @@ const getPlatformLogo = (platform) => {
 
 const PreviewSection = ({ metadata, platformLinks, formValues }) => {
   const primaryColor = formValues.primaryColor || '#FF0000';
-  const ctaText = formValues.ctaText || 'Écouter maintenant';
   
   return (
     <Box>
@@ -138,22 +136,17 @@ const PreviewSection = ({ metadata, platformLinks, formValues }) => {
               Choisissez votre plateforme préférée
             </Typography>
             
-            {/* Boutons des plateformes */}
-            <Box sx={{ my: 2 }}>
+            {/* Logos des plateformes (sans texte) */}
+            <Box sx={{ my: 2, display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
               {platformLinks.filter(link => link.enabled).map((link, index) => (
-                <PlatformButton key={index} primaryColor={primaryColor}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                    <Box 
-                      component="img" 
-                      src={getPlatformLogo(link.platform)} 
-                      alt={link.platform}
-                      sx={{ width: 24, height: 24, mr: 2 }}
-                    />
-                    <Typography variant="button">
-                      {ctaText} sur {link.platform}
-                    </Typography>
-                  </Box>
-                </PlatformButton>
+                <PlatformIcon key={index}>
+                  <Box 
+                    component="img" 
+                    src={getPlatformLogo(link.platform)} 
+                    alt={link.platform}
+                    sx={{ width: 40, height: 40 }}
+                  />
+                </PlatformIcon>
               ))}
             </Box>
             
