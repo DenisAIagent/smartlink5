@@ -29,27 +29,44 @@ const StatusBar = styled(Box)(({ theme }) => ({
   fontSize: '12px',
 }));
 
-// Composant pour le contenu du SmartLink
-const SmartLinkContent = styled(Box)(({ theme, primaryColor }) => ({
+// Composant pour le contenu du SmartLink avec fond flouté
+const SmartLinkContent = styled(Box)(({ theme, primaryColor, backgroundImage }) => ({
   height: 'calc(100% - 30px)',
   overflow: 'auto',
   backgroundColor: '#f5f5f5',
+  position: 'relative',
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundImage: `url(${backgroundImage})`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    filter: 'blur(20px)',
+    opacity: 0.3,
+    zIndex: 0,
+  }
 }));
 
 // Composant pour l'icône de plateforme (logo uniquement, sans texte)
 const PlatformIcon = styled(Box)(({ theme, primaryColor }) => ({
-  backgroundColor: 'transparent',
-  padding: '12px',
-  margin: '8px 10px',
+  backgroundColor: 'rgba(255, 255, 255, 0.8)',
+  padding: '16px',
+  margin: '10px',
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
   cursor: 'pointer',
   transition: 'all 0.2s ease',
   borderRadius: '50%',
+  boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
   '&:hover': {
-    backgroundColor: 'rgba(0,0,0,0.05)',
-    transform: 'translateY(-2px)',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    transform: 'translateY(-3px)',
+    boxShadow: '0 4px 8px rgba(0,0,0,0.15)',
   },
 }));
 
@@ -90,6 +107,7 @@ const getPlatformLogo = (platform) => {
 
 const PreviewSection = ({ metadata, platformLinks, formValues }) => {
   const primaryColor = formValues.primaryColor || '#FF0000';
+  const artworkUrl = metadata.artwork || 'https://via.placeholder.com/300x300?text=Pochette+non+disponible';
   
   return (
     <Box>
@@ -101,12 +119,12 @@ const PreviewSection = ({ metadata, platformLinks, formValues }) => {
         <StatusBar>
           <Typography variant="caption">18:19</Typography>
         </StatusBar>
-        <SmartLinkContent primaryColor={primaryColor}>
+        <SmartLinkContent primaryColor={primaryColor} backgroundImage={artworkUrl}>
           {/* Header avec pochette et infos */}
-          <Box sx={{ position: 'relative' }}>
+          <Box sx={{ position: 'relative', zIndex: 1 }}>
             <CardMedia
               component="img"
-              image={metadata.artwork || 'https://via.placeholder.com/300x300?text=Pochette+non+disponible'}
+              image={artworkUrl}
               alt={metadata.title}
               sx={{ height: 200, objectFit: 'cover' }}
             />
@@ -131,27 +149,27 @@ const PreviewSection = ({ metadata, platformLinks, formValues }) => {
           </Box>
           
           {/* Contenu principal */}
-          <Box sx={{ p: 2 }}>
-            <Typography variant="body2" color="text.secondary" gutterBottom>
+          <Box sx={{ p: 2, position: 'relative', zIndex: 1 }}>
+            <Typography variant="body2" sx={{ color: 'text.primary', fontWeight: 'bold', textAlign: 'center', mb: 2 }}>
               Choisissez votre plateforme préférée
             </Typography>
             
-            {/* Logos des plateformes (sans texte) */}
-            <Box sx={{ my: 2, display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
+            {/* Logos des plateformes (sans texte, plus grands) */}
+            <Box sx={{ my: 3, display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
               {platformLinks.filter(link => link.enabled).map((link, index) => (
                 <PlatformIcon key={index}>
                   <Box 
                     component="img" 
                     src={getPlatformLogo(link.platform)} 
                     alt={link.platform}
-                    sx={{ width: 40, height: 40 }}
+                    sx={{ width: 60, height: 60 }}
                   />
                 </PlatformIcon>
               ))}
             </Box>
             
             {/* Informations supplémentaires */}
-            <Card variant="outlined" sx={{ mt: 3 }}>
+            <Card variant="outlined" sx={{ mt: 3, backgroundColor: 'rgba(255, 255, 255, 0.85)' }}>
               <CardContent>
                 <Typography variant="subtitle2" color="text.secondary" gutterBottom>
                   Informations
@@ -199,7 +217,7 @@ const PreviewSection = ({ metadata, platformLinks, formValues }) => {
             
             {/* Footer */}
             <Box sx={{ mt: 3, textAlign: 'center' }}>
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" sx={{ color: 'text.primary', fontWeight: 'bold' }}>
                 Propulsé par MDM Music Ads
               </Typography>
             </Box>
