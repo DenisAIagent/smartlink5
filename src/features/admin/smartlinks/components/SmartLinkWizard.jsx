@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Box, Container, Grid, Typography, TextField, Button, Paper, Divider, CircularProgress } from '@mui/material';
 import { useForm, Controller } from 'react-hook-form';
 import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 import musicPlatformService from '../../../../services/musicPlatform.service';
+import apiService from '../../../../services/api.service';
 
 // Composants pour chaque section
 import MetadataSection from './sections/MetadataSection';
@@ -21,7 +23,9 @@ const SmartLinkWizard = () => {
     };
   }, []);
 
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [sourceData, setSourceData] = useState(null);
   const [platformLinks, setPlatformLinks] = useState([]);
   const [metadata, setMetadata] = useState({
@@ -49,8 +53,7 @@ const SmartLinkWizard = () => {
       metaPixelId: '',
       tiktokPixelId: '',
       template: 'standard',
-      primaryColor: '#FF0000',
-      ctaText: 'Écouter maintenant'
+      primaryColor: '#FF0000'
     }
   });
 
@@ -112,11 +115,82 @@ const SmartLinkWizard = () => {
     }
   };
 
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
     // Traitement final pour créer le SmartLink
     console.log("Données finales:", data, platformLinks);
-    toast.info("Création du SmartLink en cours...");
-    // Ici, appel à l'API pour créer le SmartLink
+    setIsSubmitting(true);
+    
+    try {
+      // Préparation des données pour l'API
+      const smartLinkData = {
+        // Métadonnées
+        title: data.title,
+        artist: data.artist,
+        isrc: data.isrc,
+        label: metadata.label,
+        distributor: metadata.distributor,
+        releaseDate: metadata.releaseDate,
+        artwork: metadata.artwork,
+        
+        // Liens des plateformes (uniquement ceux activés)
+        platformLinks: platformLinks
+          .filter(link => link.enabled)
+          .map(link => ({
+            platform: link.platform,
+            url: link.url
+          })),
+        
+        // Paramètres UTM
+        utmParams: {
+          source: data.utmSource,
+          medium: data.utmMedium,
+          campaign: data.utmCampaign,
+          customPerPlatform: data.utmCustomPerPlatform || false
+        },
+        
+        // Outils de tracking
+        tracking: {
+          gaId: data.gaId || null,
+          gtmId: data.gtmId || null,
+          adsId: data.adsId || null,
+          metaPixelId: data.metaPixelId || null,
+          tiktokPixelId: data.tiktokPixelId || null
+        },
+        
+        // Personnalisation
+        customization: {
+          template: data.template,
+          primaryColor: data.primaryColor,
+          secondaryColor: data.secondaryColor || '#333333',
+          backgroundColor: data.backgroundColor || '#FFFFFF',
+          customCss: data.customCss || null
+        }
+      };
+      
+      // Appel à l'API pour créer le SmartLink
+      toast.info("Création du SmartLink en cours...");
+      const response = await apiService.smartlinks.create(smartLinkData);
+      
+      if (response && response.success) {
+        toast.success("SmartLink créé avec succès !");
+        
+        // Redirection vers la liste des SmartLinks ou la page de détail du SmartLink créé
+        setTimeout(() => {
+          if (response.data && response.data._id) {
+            navigate(`/admin/smartlinks/${response.data._id}`);
+          } else {
+            navigate('/admin/smartlinks');
+          }
+        }, 1500);
+      } else {
+        toast.error(response?.error || "Erreur lors de la création du SmartLink.");
+      }
+    } catch (error) {
+      console.error("Erreur lors de la création du SmartLink:", error);
+      toast.error("Une erreur est survenue lors de la création du SmartLink.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleSourceSubmit = () => {
@@ -129,7 +203,6 @@ const SmartLinkWizard = () => {
     fetchLinksFromSource(sourceUrl);
   };
 
-  // Utilisation d'un rendu simplifié pour le débogage
   return (
     <Container maxWidth="lg">
       <Paper elevation={3} sx={{ p: 4, my: 4 }}>
@@ -246,6 +319,7 @@ const SmartLinkWizard = () => {
                   <Button 
                     variant="outlined" 
                     onClick={() => setSourceData(null)}
+                    disabled={isSubmitting}
                   >
                     Retour
                   </Button>
@@ -253,9 +327,10 @@ const SmartLinkWizard = () => {
                     variant="contained" 
                     color="primary" 
                     type="submit"
-                    disabled={isLoading}
+                    disabled={isSubmitting}
+                    startIcon={isSubmitting ? <CircularProgress size={20} /> : null}
                   >
-                    Créer le SmartLink
+                    {isSubmitting ? 'Création en cours...' : 'Créer le SmartLink'}
                   </Button>
                 </Box>
               </Grid>
