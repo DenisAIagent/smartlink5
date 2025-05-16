@@ -1,8 +1,41 @@
-import React from 'react';
-import { Box, Grid, Typography, TextField, Card, CardMedia } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, Grid, Typography, TextField, Card, CardMedia, Autocomplete, CircularProgress } from '@mui/material';
 import { Controller } from 'react-hook-form';
+import apiService from '../../../../../services/api.service';
 
 const MetadataSection = ({ metadata, control, setValue }) => {
+  const [artists, setArtists] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [selectedArtist, setSelectedArtist] = useState(null);
+
+  // Charger la liste des artistes au montage du composant
+  useEffect(() => {
+    const fetchArtists = async () => {
+      setLoading(true);
+      try {
+        const response = await apiService.artists.getAllArtists();
+        if (response && response.success && response.data) {
+          setArtists(response.data);
+          console.log("Liste des artistes chargée:", response.data);
+        }
+      } catch (error) {
+        console.error("Erreur lors du chargement des artistes:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchArtists();
+  }, []);
+
+  // Mettre à jour l'artistId lorsqu'un artiste est sélectionné
+  useEffect(() => {
+    if (selectedArtist) {
+      setValue('artistId', selectedArtist._id);
+      console.log("ArtistId mis à jour:", selectedArtist._id);
+    }
+  }, [selectedArtist, setValue]);
+
   return (
     <Box>
       <Typography variant="h6" gutterBottom>
@@ -27,9 +60,10 @@ const MetadataSection = ({ metadata, control, setValue }) => {
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <Controller
-                name="title"
+                name="trackTitle"
                 control={control}
                 rules={{ required: "Le titre est requis" }}
+                defaultValue={metadata.title || ""}
                 render={({ field, fieldState: { error } }) => (
                   <TextField
                     {...field}
@@ -46,16 +80,38 @@ const MetadataSection = ({ metadata, control, setValue }) => {
             
             <Grid item xs={12}>
               <Controller
-                name="artist"
+                name="artistId"
                 control={control}
+                rules={{ required: "La sélection d'un artiste est requise" }}
                 render={({ field, fieldState: { error } }) => (
-                  <TextField
-                    {...field}
-                    label="Artiste"
-                    variant="outlined"
-                    fullWidth
-                    error={!!error}
-                    helperText={error ? error.message : ""}
+                  <Autocomplete
+                    options={artists}
+                    loading={loading}
+                    getOptionLabel={(option) => option.name || ""}
+                    isOptionEqualToValue={(option, value) => option._id === value._id}
+                    onChange={(_, newValue) => {
+                      setSelectedArtist(newValue);
+                      field.onChange(newValue ? newValue._id : null);
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Sélectionner un artiste"
+                        variant="outlined"
+                        required
+                        error={!!error}
+                        helperText={error ? error.message : "Sélectionnez un artiste existant"}
+                        InputProps={{
+                          ...params.InputProps,
+                          endAdornment: (
+                            <>
+                              {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                              {params.InputProps.endAdornment}
+                            </>
+                          ),
+                        }}
+                      />
+                    )}
                   />
                 )}
               />

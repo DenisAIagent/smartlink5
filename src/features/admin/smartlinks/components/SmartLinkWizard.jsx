@@ -41,8 +41,8 @@ const SmartLinkWizard = () => {
   const { control, handleSubmit, setValue, getValues, watch } = useForm({
     defaultValues: {
       sourceUrl: '',
-      title: '',
-      artist: '',
+      trackTitle: '',
+      artistId: '',
       isrc: '',
       utmSource: 'wiseband',
       utmMedium: 'smartlink',
@@ -84,8 +84,7 @@ const SmartLinkWizard = () => {
         });
         
         // Mettre à jour les champs du formulaire
-        setValue('title', title || '');
-        setValue('artist', artist || '');
+        setValue('trackTitle', title || '');
         setValue('isrc', isrc || '');
         setValue('utmCampaign', `${artist || 'artist'}-${title || 'track'}`.toLowerCase().replace(/\s+/g, '-'));
         
@@ -121,15 +120,24 @@ const SmartLinkWizard = () => {
     setIsSubmitting(true);
     
     try {
+      // Vérification de la présence de l'artistId
+      if (!data.artistId) {
+        toast.error("Veuillez sélectionner un artiste avant de créer le SmartLink.");
+        setIsSubmitting(false);
+        return;
+      }
+      
       // Préparation des données pour l'API
       const smartLinkData = {
-        // Métadonnées
-        title: data.title,
-        artist: data.artist,
+        // Champs obligatoires pour le backend
+        artistId: data.artistId,
+        trackTitle: data.trackTitle,
+        
+        // Métadonnées supplémentaires
         isrc: data.isrc,
-        label: metadata.label,
-        distributor: metadata.distributor,
-        releaseDate: metadata.releaseDate,
+        label: data.label || metadata.label,
+        distributor: data.distributor || metadata.distributor,
+        releaseDate: data.releaseDate || metadata.releaseDate,
         artwork: metadata.artwork,
         
         // Liens des plateformes (uniquement ceux activés)
@@ -164,8 +172,13 @@ const SmartLinkWizard = () => {
           secondaryColor: data.secondaryColor || '#333333',
           backgroundColor: data.backgroundColor || '#FFFFFF',
           customCss: data.customCss || null
-        }
+        },
+        
+        // Statut de publication
+        isPublished: true
       };
+      
+      console.log("Payload envoyé au backend:", smartLinkData);
       
       // Appel à l'API pour créer le SmartLink
       toast.info("Création du SmartLink en cours...");
