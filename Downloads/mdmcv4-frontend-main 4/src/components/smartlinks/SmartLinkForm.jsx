@@ -1,32 +1,19 @@
 import React, { useState, useEffect } from 'react';
+import { Box, TextField, Button, Card, CardContent, Grid, FormControl, InputLabel, Select, MenuItem, Alert, CircularProgress } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  TextField,
-  Button,
-  Grid,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Alert,
-  CircularProgress
-} from '@mui/material';
 import { smartlinksService } from '../../services/smartlinks.service';
 import { artistsService } from '../../services/artists.service';
 import logger from '../../utils/logger';
 
-const SmartLinkCreator = ({ onSuccess, initialData }) => {
+const SmartLinkForm = ({ initialData, onSuccess }) => {
   const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     platform: '',
     url: '',
-    artistId: ''
+    artistId: '',
+    utmContent: ''
   });
   const [artists, setArtists] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -43,7 +30,6 @@ const SmartLinkCreator = ({ onSuccess, initialData }) => {
         setError(t('errors.loadingFailed'));
       }
     };
-
     fetchArtists();
   }, [t]);
 
@@ -55,10 +41,7 @@ const SmartLinkCreator = ({ onSuccess, initialData }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
@@ -66,31 +49,18 @@ const SmartLinkCreator = ({ onSuccess, initialData }) => {
     setLoading(true);
     setError(null);
     setSuccess(false);
-
     try {
       const response = initialData
         ? await smartlinksService.update(initialData.id, formData)
         : await smartlinksService.create(formData);
-
       setSuccess(true);
       logger.info(
         initialData ? 'Smartlink mis à jour avec succès' : 'Smartlink créé avec succès',
         { id: response.id }
       );
-
-      if (onSuccess) {
-        onSuccess(response);
-      }
-
+      if (onSuccess) onSuccess(response);
       if (!initialData) {
-        // Réinitialiser le formulaire seulement si c'est une création
-        setFormData({
-          name: '',
-          description: '',
-          platform: '',
-          url: '',
-          artistId: ''
-        });
+        setFormData({ name: '', description: '', platform: '', url: '', artistId: '', utmContent: '' });
       }
     } catch (err) {
       logger.error(
@@ -105,10 +75,6 @@ const SmartLinkCreator = ({ onSuccess, initialData }) => {
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom>
-        {initialData ? t('smartlinks.edit') : t('smartlinks.create')}
-      </Typography>
-
       <Card>
         <CardContent>
           <form onSubmit={handleSubmit}>
@@ -125,19 +91,17 @@ const SmartLinkCreator = ({ onSuccess, initialData }) => {
                   helperText={!formData.name ? t('validation.required') : ''}
                 />
               </Grid>
-
               <Grid item xs={12}>
                 <TextField
                   fullWidth
                   multiline
-                  rows={4}
+                  rows={3}
                   label={t('smartlinks.description')}
                   name="description"
                   value={formData.description}
                   onChange={handleChange}
                 />
               </Grid>
-
               <Grid item xs={12} sm={6}>
                 <TextField
                   required
@@ -150,7 +114,6 @@ const SmartLinkCreator = ({ onSuccess, initialData }) => {
                   helperText={!formData.platform ? t('validation.required') : ''}
                 />
               </Grid>
-
               <Grid item xs={12} sm={6}>
                 <TextField
                   required
@@ -163,7 +126,6 @@ const SmartLinkCreator = ({ onSuccess, initialData }) => {
                   helperText={!formData.url ? t('validation.required') : ''}
                 />
               </Grid>
-
               <Grid item xs={12}>
                 <FormControl fullWidth required error={!formData.artistId}>
                   <InputLabel>{t('smartlinks.artist')}</InputLabel>
@@ -179,26 +141,24 @@ const SmartLinkCreator = ({ onSuccess, initialData }) => {
                       </MenuItem>
                     ))}
                   </Select>
-                  {!formData.artistId && (
-                    <Typography color="error" variant="caption">
-                      {t('validation.required')}
-                    </Typography>
-                  )}
                 </FormControl>
               </Grid>
-
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label={t('smartlinks.utmContent')}
+                  name="utmContent"
+                  value={formData.utmContent}
+                  onChange={handleChange}
+                  helperText={errors?.utmContent?.message || "Différencier des variantes d'une même campagne (optionnel)"}
+                />
+              </Grid>
               <Grid item xs={12}>
                 {error && (
-                  <Alert severity="error" sx={{ mb: 2 }}>
-                    {error}
-                  </Alert>
+                  <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>
                 )}
                 {success && (
-                  <Alert severity="success" sx={{ mb: 2 }}>
-                    {initialData
-                      ? t('smartlinks.updateSuccess')
-                      : t('smartlinks.creationSuccess')}
-                  </Alert>
+                  <Alert severity="success" sx={{ mb: 2 }}>{initialData ? t('smartlinks.updateSuccess') : t('smartlinks.creationSuccess')}</Alert>
                 )}
                 <Button
                   type="submit"
@@ -207,9 +167,7 @@ const SmartLinkCreator = ({ onSuccess, initialData }) => {
                   disabled={loading || !formData.name || !formData.platform || !formData.url || !formData.artistId}
                   startIcon={loading ? <CircularProgress size={20} /> : null}
                 >
-                  {loading
-                    ? (initialData ? t('common.updating') : t('common.creating'))
-                    : (initialData ? t('smartlinks.update') : t('smartlinks.create'))}
+                  {loading ? (initialData ? t('common.updating') : t('common.creating')) : (initialData ? t('smartlinks.update') : t('smartlinks.create'))}
                 </Button>
               </Grid>
             </Grid>
@@ -220,4 +178,4 @@ const SmartLinkCreator = ({ onSuccess, initialData }) => {
   );
 };
 
-export default SmartLinkCreator; 
+export default SmartLinkForm; 
