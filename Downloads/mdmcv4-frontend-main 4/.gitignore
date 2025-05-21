@@ -33,3 +33,18 @@ coverage/
 # Temporary files
 *.tmp
 *.temp
+
+# Personal files
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.mp3
+*.mp4
+*.pdf
+*.doc
+*.docx
+*.xlsx
+*.zip
+*.rar
+*.tar.gz
