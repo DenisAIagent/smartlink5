@@ -87,6 +87,15 @@ const Footer = ({ openSimulator }) => {
                   {t('footer.legal_cookies')}
                 </button>
               </li>
+              <li>
+                <button
+                  type="button"
+                  className="btn-admin-login"
+                  onClick={() => window.location.href = '/admin'}
+                >
+                  Me connecter
+                </button>
+              </li>
             </ul>
           </div>
         </div>
