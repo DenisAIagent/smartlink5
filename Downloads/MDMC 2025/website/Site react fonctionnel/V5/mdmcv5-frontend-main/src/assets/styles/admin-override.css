@@ -1,0 +1,128 @@
+/* Styles spécifiques pour l'interface d'administration 
+   Ces styles vont surcharger les styles globaux pour l'admin */
+
+/* Suppression du padding-top du body pour l'admin */
+body.admin-body {
+  padding-top: 0 !important;
+  background-color: #1a1a1a;
+}
+
+/* Style spécifique pour la page de connexion admin */
+.admin-login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #1a1a1a;
+}
+
+.admin-login-card {
+  width: 100%;
+  max-width: 450px;
+  padding: 2.5rem;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.admin-login-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.admin-login-header h1 {
+  color: #e60012;
+  margin-bottom: 0.5rem;
+}
+
+.admin-login-header p {
+  color: #666;
+}
+
+.admin-login-error {
+  background-color: #ffebee;
+  color: #d32f2f;
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.admin-login-form .form-group {
+  margin-bottom: 1.5rem;
+}
+
+.admin-login-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #333;
+  font-weight: 500;
+}
+
+.admin-login-form input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+
+.admin-login-form input:focus {
+  border-color: #e60012;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(230, 0, 18, 0.1);
+}
+
+.admin-login-button {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #e60012;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.admin-login-button:hover {
+  background-color: #d10010;
+}
+
+.admin-login-button.loading {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.admin-login-footer {
+  margin-top: 1.5rem;
+  text-align: center;
+}
+
+.admin-login-footer a {
+  color: #666;
+  text-decoration: underline;
+}
+
+.admin-login-footer a:hover {
+  color: #e60012;
+}
+
+/* Styles pour le panneau d'administration */
+.admin-panel {
+  min-height: 100vh;
+  background-color: #1a1a1a;
+  color: #fff;
+}
+
+/* Styles pour les messages d'erreur API */
+.api-error {
+  background-color: #ffebee;
+  color: #d32f2f;
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
