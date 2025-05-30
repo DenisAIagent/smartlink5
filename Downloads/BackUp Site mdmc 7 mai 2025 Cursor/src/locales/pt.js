@@ -1,1 +1,0 @@
-missionSlogan: "Com nosso slogan <strong>Push Your Music</strong>, conectamos talentos ao seu público ideal.", 
