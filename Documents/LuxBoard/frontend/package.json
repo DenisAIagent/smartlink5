@@ -1,0 +1,48 @@
+{
+  "name": "luxboard",
+  "version": "1.0.0",
+  "description": "Webapp de conciergerie de luxe - Plateforme premium pour prestataires, offres privilèges et événements exclusifs",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "nodemon backend/server.js",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:all": "concurrently \"npm run dev\" \"npm run dev:frontend\"",
+    "build": "cd frontend && npm run build",
+    "install:frontend": "cd frontend && npm install",
+    "test": "echo \"Tests à implémenter\" && exit 0",
+    "lint": "eslint backend/",
+    "lint:fix": "eslint backend/ --fix"
+  },
+  "keywords": [
+    "conciergerie",
+    "luxe",
+    "prestataires",
+    "événements",
+    "offres"
+  ],
+  "author": "LuxBoard Team",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.9.0",
+    "bcryptjs": "^3.0.2",
+    "compression": "^1.8.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.1.0",
+    "joi": "^17.13.3",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.15.1",
+    "mongoose-paginate-v2": "^1.9.1",
+    "morgan": "^1.10.0",
+    "multer": "^2.0.0",
+    "socket.io": "^4.8.1"
+  },
+  "devDependencies": {
+    "eslint": "^9.28.0",
+    "nodemon": "^3.1.10",
+    "prettier": "^3.5.3"
+  }
+}
