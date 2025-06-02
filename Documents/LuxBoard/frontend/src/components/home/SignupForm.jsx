@@ -1,76 +1,35 @@
 import React from 'react';
 
-const SignupForm = () => {
+export default function SignupForm() {
   const handleSubmit = (e) => {
     e.preventDefault();
     // Logique de soumission du formulaire à implémenter
   };
 
   return (
-    <div className="hero-form" id="signup-form">
-      <div className="exclusive-badge">Accès Privilège</div>
-      
-      <div className="form-title">Essai Gratuit</div>
-      <div className="form-subtitle">14 jours sans engagement</div>
-
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label className="form-label" htmlFor="name">Nom complet</label>
-          <input 
-            type="text" 
-            id="name" 
-            name="name" 
-            className="form-input" 
-            placeholder="Votre nom complet"
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label className="form-label" htmlFor="email">Adresse e-mail</label>
-          <input 
-            type="email" 
-            id="email" 
-            name="email" 
-            className="form-input" 
-            placeholder="votre@email.com"
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label className="form-label" htmlFor="phone">Téléphone</label>
-          <input 
-            type="tel" 
-            id="phone" 
-            name="phone" 
-            className="form-input" 
-            placeholder="06 12 34 56 78"
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label className="form-label" htmlFor="company">Entreprise</label>
-          <input 
-            type="text" 
-            id="company" 
-            name="company" 
-            className="form-input" 
-            placeholder="Nom de votre entreprise"
-          />
-        </div>
-
-        <button type="submit" className="form-button">
-          Démarrer mon essai gratuit
-        </button>
+    <div className="signup-form-container" id="signup-form">
+      {/* Badge accès privilège */}
+      <div className="signup-form-badge">ACCÈS PRIVILÈGE</div>
+      {/* Titre et sous-titre */}
+      <div className="signup-form-title">ESSAI GRATUIT</div>
+      <div className="signup-form-subtitle">14 jours sans engagement</div>
+      {/* Formulaire */}
+      <form onSubmit={handleSubmit} className="signup-form">
+        <label htmlFor="name">Nom complet</label>
+        <input id="name" name="name" type="text" placeholder="Votre nom complet" required />
+        <label htmlFor="email">Adresse e-mail</label>
+        <input id="email" name="email" type="email" placeholder="votre@email.com" required />
+        <label htmlFor="phone">Téléphone</label>
+        <input id="phone" name="phone" type="tel" placeholder="06 12 34 56 78" required />
+        <label htmlFor="company">Entreprise</label>
+        <input id="company" name="company" type="text" placeholder="Nom de votre entreprise" />
+        <button type="submit" className="signup-form-btn">DÉMARRER MON ESSAI GRATUIT</button>
       </form>
-
-      <div className="form-footer">
-        ✅ Sans engagement • ✅ Support inclus • ✅ Configuration gratuite
+      {/* Mentions */}
+      <div className="signup-form-footer">
+        <span className="success">✓ Sans engagement</span> <span className="success">✓ Support inclus</span><br />
+        <span className="info">Configuration gratuite</span>
       </div>
     </div>
   );
-};
-
-export default SignupForm; 
+} 
