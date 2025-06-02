@@ -12,6 +12,9 @@ import BookingConfirmationPage from './pages/BookingConfirmationPage';
 import ErrorDisplay from './components/ErrorDisplay';
 import { csrfService } from './services/csrfService';
 import { errorService } from './services/errorService';
+import LuxBoardLanding from './pages/LuxBoardLanding';
+import LuxBoardDashboard from './pages/LuxBoardDashboard';
+import LuxBoardLogin from './pages/LuxBoardLogin';
 
 const App = () => {
   useEffect(() => {
@@ -31,7 +34,9 @@ const App = () => {
       <Router>
         <div className="min-h-screen bg-gray-50">
           <Routes>
-            <Route path="/" element={<LandingPage />} />
+            <Route path="/" element={<LuxBoardLanding />} />
+            <Route path="/dashboard-luxboard" element={<LuxBoardDashboard />} />
+            <Route path="/login-luxboard" element={<LuxBoardLogin />} />
             <Route path="/login" element={<LoginPage />} />
             <Route
               path="/dashboard"
