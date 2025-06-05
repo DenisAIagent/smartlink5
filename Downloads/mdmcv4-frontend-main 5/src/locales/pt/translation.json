@@ -1,0 +1,26 @@
+{
+  "homepage": {
+    "hero": {
+      "h1": "Agência de marketing musical digital",
+      "p1": "A MDMC Music Ads ajuda artistas, labels e managers a crescer com campanhas publicitárias direcionadas no YouTube, Meta, TikTok e Spotify. Mais de 1.500 projetos acompanhados, +34M de visualizações geradas.",
+      "p2": "Transformamos dados em performance para atrair um público real e gerar resultados concretos."
+    },
+    "caseStudies": {
+      "merchandising": {
+        "title": "Prova de resultados – Merchandising",
+        "description": "Descubra como ajudámos um artista a multiplicar por 7 as suas vendas de merchandising em apenas 2 meses.",
+        "caption": "Abril–Maio 2025"
+      },
+      "streaming": {
+        "title": "Caso de cliente – Streaming",
+        "description": "Uma campanha direcionada que gerou mais de 4.000 conversões a um custo por conversão ultra competitivo.",
+        "caption": "Nov–Dez 2024"
+      },
+      "youtube": {
+        "title": "Performance no YouTube",
+        "description": "Uma campanha de vídeo que gerou mais de 27.000 visualizações com uma excelente taxa de conversão.",
+        "caption": "Abril–Maio 2025"
+      }
+    }
+  }
+} 
