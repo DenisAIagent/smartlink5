@@ -1,0 +1,12 @@
+:root {
+  --color-bg: #0A0A0A;
+  --color-primary: #E50914;
+  --color-text: #FFFFFF;
+  --color-text-secondary: #AAAAAA;
+  --color-border: #333333;
+  --color-overlay: rgba(10, 10, 10, 0.8);
+  --font-title: 'Poppins', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --transition: all 0.3s ease;
+  --shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
