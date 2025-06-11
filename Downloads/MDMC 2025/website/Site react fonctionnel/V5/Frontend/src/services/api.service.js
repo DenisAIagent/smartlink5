@@ -16,15 +16,12 @@ const apiClient = axios.create({
 
 // Intercepteur de réponse Axios
 apiClient.interceptors.response.use(
-  (response) => {
-    // Si la requête réussit, on retourne directement les 'data' de la réponse.
-    return response.data; // Le backend renvoie { success: true, data: ... } ou { success: false, error: '...' }
-  },
+  (response) => response.data,
   (error) => {
     console.error('API Error Interceptor caught an error:', error.response || error.message || error);
 
     let structuredError = {
-      message: 'An unexpected error occurred. Please try again.',
+      message: 'Une erreur inattendue est survenue. Veuillez réessayer.',
       status: null,
       data: null,
     };
@@ -33,19 +30,16 @@ apiClient.interceptors.response.use(
       structuredError.status = error.response.status;
       structuredError.data = error.response.data;
       structuredError.message =
-        error.response.data?.error || // Notre backend utilise { success: false, error: 'message' }
+        error.response.data?.error ||
         error.response.data?.message ||
         error.message ||
-        `Request failed with status ${error.response.status}`;
+        `La requête a échoué avec le statut ${error.response.status}`;
 
       if (error.response.status === 401) {
-        console.warn('API Error 401: Unauthorized. Token might be invalid, expired, or not sent.');
-        // Gérer la déconnexion ou la redirection ici si nécessaire, par exemple :
-        // window.location.href = '/login'; // Redirection brutale
-        // Ou émettre un événement pour que l'UI réagisse.
+        console.warn('API Error 401: Non autorisé. Le token est peut-être invalide, expiré ou non envoyé.');
       }
     } else if (error.request) {
-      structuredError.message = 'No response from server. Check your network connection or CORS policy on the server.';
+      structuredError.message = 'Pas de réponse du serveur. Vérifiez votre connexion réseau ou la politique CORS du serveur.';
     } else {
       structuredError.message = error.message;
     }
@@ -55,48 +49,49 @@ apiClient.interceptors.response.use(
 
 // --- Service d'Authentification ---
 export const authService = {
-  getMe: async () => apiClient.get('/auth/me'),
-  login: async (credentials) => apiClient.post('/auth/login', credentials),
-  logout: async () => apiClient.get('/auth/logout'),
-  register: async (userData) => apiClient.post('/auth/register', userData),
+  getMe: async () => apiClient.get(`${API_CONFIG.ENDPOINTS.AUTH}/me`),
+  login: async (credentials) => apiClient.post(`${API_CONFIG.ENDPOINTS.AUTH}/login`, credentials),
+  logout: async () => apiClient.get(`${API_CONFIG.ENDPOINTS.AUTH}/logout`),
+  register: async (userData) => apiClient.post(`${API_CONFIG.ENDPOINTS.AUTH}/register`, userData),
   // updatePassword: async (passwords) => apiClient.put('/auth/updatepassword', passwords),
 };
 
 // --- Service pour les SmartLinks (MIS À JOUR) ---
 export const smartLinkService = {
-  create: async (data) => apiClient.post("/smartlinks", data), // POST /api/smartlinks
-  getAll: async (params) => apiClient.get("/smartlinks", { params }), // GET /api/smartlinks
-  getById: async (id) => apiClient.get(`/smartlinks/${id}`), // GET /api/smartlinks/:id
-  update: async (id, data) => apiClient.put(`/smartlinks/${id}`, data), // PUT /api/smartlinks/:id
-  deleteById: async (id) => apiClient.delete(`/smartlinks/${id}`), // DELETE /api/smartlinks/:id
+  create: async (data) => apiClient.post(API_CONFIG.ENDPOINTS.SMARTLINKS, data),
+  getAll: async (params) => apiClient.get(API_CONFIG.ENDPOINTS.SMARTLINKS, { params }),
+  getById: async (id) => apiClient.get(`${API_CONFIG.ENDPOINTS.SMARTLINKS}/${id}`),
+  update: async (id, data) => apiClient.put(`${API_CONFIG.ENDPOINTS.SMARTLINKS}/${id}`, data),
+  deleteById: async (id) => apiClient.delete(`${API_CONFIG.ENDPOINTS.SMARTLINKS}/${id}`),
 
   // Pour la page publique SmartLink (utilise les slugs, non protégée)
   // Le backend (route /api/smartlinks/public/:artistSlug/:trackSlug) appellera le middleware logClick
   getBySlugs: async (artistSlug, trackSlug) =>
-    apiClient.get(`/smartlinks/public/${artistSlug}/${trackSlug}`), // CORRIGÉ: Chemin pour correspondre aux routes backend
+    apiClient.get(`${API_CONFIG.ENDPOINTS.SMARTLINKS}/public/${artistSlug}/${trackSlug}`),
 
   // Nouvelle méthode pour logguer un clic sur une plateforme spécifique
   logPlatformClick: async (smartlinkId, platformData) => // platformData pourrait être { platformName: 'Spotify' }
-    apiClient.post(`/smartlinks/${smartlinkId}/log-platform-click`, platformData), // POST /api/smartlinks/:id/log-platform-click
+    apiClient.post(`${API_CONFIG.ENDPOINTS.SMARTLINKS}/${smartlinkId}/log-platform-click`, platformData),
 
   // Nouvelle méthode pour auto-fetch des liens de plateformes
-  fetchPlatformLinks: async (sourceUrl) => apiClient.post('/smartlinks/fetch-platform-links', { sourceUrl }),
+  fetchPlatformLinks: async (sourceUrl) => 
+    apiClient.post(`${API_CONFIG.ENDPOINTS.SMARTLINKS}/fetch-platform-links`, { sourceUrl }),
 };
 
 // --- Service pour les Artistes ---
 export const artistService = {
-  createArtist: async (artistData) => apiClient.post('/artists', artistData), // POST /api/artists
-  getAllArtists: async (params) => apiClient.get('/artists', { params }), // GET /api/artists
-  getArtistBySlug: async (slug) => apiClient.get(`/artists/${slug}`), // GET /api/artists/:slug (assurez-vous que la route est /:slug et non /slug/:slug)
-  updateArtist: async (slug, artistData) => apiClient.put(`/artists/${slug}`, artistData), // PUT /api/artists/:slug
-  deleteArtist: async (slug) => apiClient.delete(`/artists/${slug}`), // DELETE /api/artists/:slug
+  createArtist: async (artistData) => apiClient.post(API_CONFIG.ENDPOINTS.ARTISTS, artistData),
+  getAllArtists: async (params) => apiClient.get(API_CONFIG.ENDPOINTS.ARTISTS, { params }),
+  getArtistBySlug: async (slug) => apiClient.get(`${API_CONFIG.ENDPOINTS.ARTISTS}/${slug}`),
+  updateArtist: async (slug, artistData) => apiClient.put(`${API_CONFIG.ENDPOINTS.ARTISTS}/${slug}`, artistData),
+  deleteArtist: async (slug) => apiClient.delete(`${API_CONFIG.ENDPOINTS.ARTISTS}/${slug}`),
   // getArtistById: async (id) => apiClient.get(`/artists/id/${id}`), // Si vous avez une route spécifique pour l'ID
 };
 
 // --- Service pour l'Upload d'Images ---
 export const uploadService = {
-  uploadImage: async (formData) => { // formData doit être un objet FormData
-    return apiClient.post('/upload/image', formData, { // POST /api/upload/image
+  uploadImage: async (formData) => {
+    return apiClient.post(`${API_CONFIG.ENDPOINTS.UPLOAD}/image`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -106,15 +101,18 @@ export const uploadService = {
 
 // --- Service pour les Reviews (Exemple, basé sur votre code) ---
 export const reviewService = {
-  createReview: async (reviewData) => apiClient.post('/reviews', reviewData),
-  getReviews: async (params) => apiClient.get('/reviews', { params }),
-  updateReviewStatus: async (id, statusData) => apiClient.put(`/reviews/${id}`, statusData),
-  deleteReview: async (id) => apiClient.delete(`/reviews/${id}`),
+  createReview: async (reviewData) => apiClient.post(API_CONFIG.ENDPOINTS.REVIEWS, reviewData),
+  getReviews: async (params) => apiClient.get(API_CONFIG.ENDPOINTS.REVIEWS, { params }),
+  updateReviewStatus: async (id, statusData) => apiClient.put(`${API_CONFIG.ENDPOINTS.REVIEWS}/${id}`, statusData),
+  deleteReview: async (id) => apiClient.delete(`${API_CONFIG.ENDPOINTS.REVIEWS}/${id}`),
 };
 
 // --- Service pour WordPress/Blog Posts (Exemple, basé sur votre code) ---
 export const blogService = {
-  getLatestPosts: async (limit = 3) => apiClient.get('/wordpress/posts', { params: { limit, sort: '-publishedDate' } }),
+  getLatestPosts: async (limit = 3) => 
+    apiClient.get(`${API_CONFIG.ENDPOINTS.WORDPRESS}/posts`, { 
+      params: { limit, sort: '-publishedDate' } 
+    }),
   // getAllPosts: async (params) => apiClient.get('/wordpress/posts', { params }),
   // getPostBySlug: async (slug) => apiClient.get(`/wordpress/posts/slug/${slug}`),
 };
