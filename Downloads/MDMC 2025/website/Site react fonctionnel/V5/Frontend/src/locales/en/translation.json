@@ -1,0 +1,42 @@
+{
+  "meta": {
+    "title": "MDMC Music Ads | B2B Music Marketing",
+    "description": "MDMC Music Ads is a B2B music marketing agency specializing in artist promotion and smartlink creation for the music industry.",
+    "keywords": "music marketing, artist promotion, smartlinks, music industry, B2B, marketing agency"
+  },
+  "home": {
+    "title": "Home",
+    "description": "Discover our music marketing services and innovative solutions for artists and the music industry."
+  },
+  "artists": {
+    "title": "Our Artists",
+    "description": "Explore our artist portfolio and discover their success in the music industry."
+  },
+  "smartlinks": {
+    "title": "SmartLinks",
+    "description": "Create smart links to promote your music across all streaming platforms."
+  },
+  "reviews": {
+    "title": "Testimonials",
+    "description": "See what our clients say about our music marketing services."
+  },
+  "contact": {
+    "title": "Contact",
+    "description": "Contact us to discuss your music project and discover how we can help you."
+  },
+  "a11y": {
+    "tester": {
+      "title": "Accessibility Tests",
+      "noIssues": "No accessibility issues detected",
+      "impact": "Impact",
+      "nodes": "Affected elements",
+      "help": "Solution",
+      "severity": {
+        "critical": "Critical",
+        "serious": "Serious",
+        "moderate": "Moderate",
+        "minor": "Minor"
+      }
+    }
+  }
+} 

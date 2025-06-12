@@ -1,0 +1,123 @@
+/* Configuration des polices optimisée pour les performances */
+
+/* Inter - Police principale */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Inter Regular'),
+       url('/fonts/inter-var.woff2') format('woff2-variations');
+  font-variation-settings: 'wght' 400;
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: local('Inter Medium'),
+       url('/fonts/inter-var.woff2') format('woff2-variations');
+  font-variation-settings: 'wght' 500;
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Inter SemiBold'),
+       url('/fonts/inter-var.woff2') format('woff2-variations');
+  font-variation-settings: 'wght' 600;
+}
+
+/* Montserrat - Police pour les titres */
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Montserrat Bold'),
+       url('/fonts/montserrat-bold.woff2') format('woff2');
+}
+
+/* Variables CSS pour les polices */
+:root {
+  --font-primary: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  --font-heading: 'Montserrat', var(--font-primary);
+  
+  /* Tailles de police responsives */
+  --font-size-base: clamp(1rem, 1vw + 0.75rem, 1.125rem);
+  --font-size-sm: clamp(0.875rem, 0.9vw + 0.65rem, 1rem);
+  --font-size-lg: clamp(1.125rem, 1.1vw + 0.85rem, 1.25rem);
+  --font-size-xl: clamp(1.25rem, 1.3vw + 0.95rem, 1.5rem);
+  --font-size-2xl: clamp(1.5rem, 1.5vw + 1.15rem, 2rem);
+  --font-size-3xl: clamp(2rem, 2vw + 1.35rem, 2.5rem);
+  
+  /* Line heights */
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+  
+  /* Font weights */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+}
+
+/* Classes utilitaires pour les polices */
+.font-primary {
+  font-family: var(--font-primary);
+}
+
+.font-heading {
+  font-family: var(--font-heading);
+}
+
+.text-base {
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+}
+
+.text-sm {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+}
+
+.text-lg {
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-normal);
+}
+
+.text-xl {
+  font-size: var(--font-size-xl);
+  line-height: var(--line-height-tight);
+}
+
+.text-2xl {
+  font-size: var(--font-size-2xl);
+  line-height: var(--line-height-tight);
+}
+
+.text-3xl {
+  font-size: var(--font-size-3xl);
+  line-height: var(--line-height-tight);
+}
+
+/* Optimisations pour le mode sombre */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --font-smoothing: antialiased;
+  }
+}
+
+/* Optimisations pour le mode de réduction de mouvement */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+} 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { HelmetProvider } from 'react-helmet-async';
 import {
   HashRouter as Router,
   Routes,
@@ -44,32 +45,10 @@ import LogoutIcon from '@mui/icons-material/Logout';
 
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
-import Simulator from './components/features/Simulator';
-import CookieBanner from './components/features/CookieBanner';
-
-import Hero from './components/sections/Hero';
-import Services from './components/sections/Services';
-import About from './components/sections/About';
-import Articles from './components/sections/Articles';
-import Reviews from './components/sections/Reviews';
-import Contact from './components/sections/Contact';
-import AllReviews from './components/pages/AllReviews';
-import ArtistPage from './pages/public/ArtistPage';
-import SmartLinkPage from './pages/public/SmartLinkPage';
-
-import AdminLogin from './components/admin/AdminLogin';
-import AdminPanel from './components/admin/AdminPanel';
-import ArtistListPage from './pages/admin/artists/ArtistListPage';
-import ArtistCreatePage from './pages/admin/artists/ArtistCreatePage';
-import ArtistEditPage from './pages/admin/artists/ArtistEditPage';
-import SmartlinkListPage from './pages/admin/smartlinks/SmartlinkListPage';
-import SmartlinkCreatePage from './pages/admin/smartlinks/SmartlinkCreatePage';
-import SmartlinkEditPage from './pages/admin/smartlinks/SmartlinkEditPage';
-import LandingPageGenerator from './components/admin/LandingPageGenerator';
-import WordPressConnector from './components/admin/WordPressConnector';
-import WordPressSync from './components/admin/WordPressSync';
-import ReviewManager from './components/admin/ReviewManager';
-import CampaignStatsShowcase from './components/landing/common/CampaignStatsShowcase';
+import SEO from './components/SEO';
+import { LazyLoad, LoadingFallback } from './components/lazy/LazyLoad';
+import * as LazyComponents from './components/lazy';
+import AccessibilityTester from './components/a11y/AccessibilityTester';
 
 const drawerWidth = 240;
 
@@ -196,79 +175,146 @@ const HomePage = ({ openSimulator }) => {
   useEffect(() => { console.log("HomePage rendu"); }, []);
   return (
     <>
-      <Header />
-      <main>
-        <Hero openSimulator={openSimulator} />
-        <Services />
-        <About />
-        <Articles />
-        <Reviews />
-        <Contact />
-      </main>
-      <Footer openSimulator={openSimulator} />
-      <CookieBanner />
+      <SEO
+        title="MDMC Music Ads - Solutions de Marketing Musical"
+        description="Solutions innovantes de marketing musical pour les artistes et les labels. Maximisez votre visibilité et votre engagement avec nos outils spécialisés."
+        keywords="marketing musical, promotion artiste, solutions marketing, MDMC Music Ads"
+      />
+      <LazyLoad>
+        <LazyComponents.Hero openSimulator={openSimulator} />
+      </LazyLoad>
+      <LazyLoad>
+        <LazyComponents.Services />
+      </LazyLoad>
+      <LazyLoad>
+        <LazyComponents.About />
+      </LazyLoad>
+      <LazyLoad>
+        <LazyComponents.Articles />
+      </LazyLoad>
+      <LazyLoad>
+        <LazyComponents.Reviews />
+      </LazyLoad>
+      <LazyLoad>
+        <LazyComponents.Contact />
+      </LazyLoad>
     </>
   );
 };
 
 function App() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const simulatorRef = useRef(null);
-
-  useEffect(() => {
-    updateMetaTags(t);
-    const lang = i18n.language.split('-')[0];
-    document.documentElement.setAttribute('lang', lang);
-    const ogLocaleValue = i18n.language.replace('-', '_');
-    const ogLocaleElement = document.querySelector('meta[property="og:locale"]');
-    if (ogLocaleElement) ogLocaleElement.setAttribute('content', ogLocaleValue);
-  }, [t, i18n.language]);
-
   const openSimulator = () => simulatorRef.current?.openSimulator();
+  const [showA11yTester, setShowA11yTester] = useState(process.env.NODE_ENV === 'development');
 
   return (
-    <Router>
-      <Simulator ref={simulatorRef} />
-      <Routes>
-        <Route path="/" element={<>
+    <HelmetProvider>
+      <Router>
+        <div className="app">
           <Header />
           <main>
-            <Hero />
-            <Services />
-            <About />
-            <Articles />
-            <Reviews />
-            <Contact />
+            <Routes>
+              {/* Routes publiques */}
+              <Route path="/" element={<HomePage openSimulator={openSimulator} />} />
+              <Route path="/artists/:id" element={
+                <LazyLoad>
+                  <LazyComponents.ArtistPage />
+                </LazyLoad>
+              } />
+              <Route path="/smartlinks/:id" element={
+                <LazyLoad>
+                  <LazyComponents.SmartLinkPage />
+                </LazyLoad>
+              } />
+              <Route path="/reviews" element={
+                <LazyLoad>
+                  <LazyComponents.AllReviews />
+                </LazyLoad>
+              } />
+
+              {/* Routes d'administration */}
+              <Route path="/admin/login" element={
+                <LazyLoad>
+                  <LazyComponents.AdminLogin />
+                </LazyLoad>
+              } />
+              <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
+                <Route index element={<Navigate to="/admin/dashboard" replace />} />
+                <Route path="dashboard" element={
+                  <LazyLoad>
+                    <LazyComponents.AdminPanel />
+                  </LazyLoad>
+                } />
+                <Route path="artists" element={
+                  <LazyLoad>
+                    <LazyComponents.ArtistListPage />
+                  </LazyLoad>
+                } />
+                <Route path="artists/create" element={
+                  <LazyLoad>
+                    <LazyComponents.ArtistCreatePage />
+                  </LazyLoad>
+                } />
+                <Route path="artists/:id/edit" element={
+                  <LazyLoad>
+                    <LazyComponents.ArtistEditPage />
+                  </LazyLoad>
+                } />
+                <Route path="smartlinks" element={
+                  <LazyLoad>
+                    <LazyComponents.SmartlinkListPage />
+                  </LazyLoad>
+                } />
+                <Route path="smartlinks/create" element={
+                  <LazyLoad>
+                    <LazyComponents.SmartlinkCreatePage />
+                  </LazyLoad>
+                } />
+                <Route path="smartlinks/:id/edit" element={
+                  <LazyLoad>
+                    <LazyComponents.SmartlinkEditPage />
+                  </LazyLoad>
+                } />
+                <Route path="landing-pages" element={
+                  <LazyLoad>
+                    <LazyComponents.LandingPageGenerator />
+                  </LazyLoad>
+                } />
+                <Route path="wordpress" element={
+                  <LazyLoad>
+                    <LazyComponents.WordPressConnector />
+                  </LazyLoad>
+                } />
+                <Route path="wordpress/sync" element={
+                  <LazyLoad>
+                    <LazyComponents.WordPressSync />
+                  </LazyLoad>
+                } />
+                <Route path="reviews" element={
+                  <LazyLoad>
+                    <LazyComponents.ReviewManager />
+                  </LazyLoad>
+                } />
+                <Route path="stats" element={
+                  <LazyLoad>
+                    <LazyComponents.CampaignStatsShowcase />
+                  </LazyLoad>
+                } />
+              </Route>
+            </Routes>
           </main>
           <Footer />
-          <CookieBanner />
-        </>} />
-        <Route path="/all-reviews" element={<AllReviews />} />
-        <Route path="/artists/:slug" element={<ArtistPage />} />
-        <Route path="/s/:slug" element={<SmartLinkPage />} />
-        <Route path="/smartlinks/:artistSlug/:trackSlug" element={<SmartLinkPage />} />
-        <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
-          <Route index element={<Navigate to="/admin/dashboard" replace />} />
-          <Route path="dashboard" element={<AdminPanel />} />
-          <Route path="artists" element={<Outlet />}>
-            <Route index element={<ArtistListPage />} />
-            <Route path="new" element={<ArtistCreatePage />} />
-            <Route path="edit/:slug" element={<ArtistEditPage />} />
-          </Route>
-          <Route path="smartlinks" element={<Outlet />}>
-            <Route index element={<SmartlinkListPage />} />
-            <Route path="new" element={<SmartlinkCreatePage />} />
-            <Route path="edit/:smartlinkId" element={<SmartlinkEditPage />} />
-          </Route>
-          <Route path="landing-pages" element={<LandingPageGenerator />} />
-          <Route path="wordpress" element={<Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}><WordPressConnector /><WordPressSync /></Box>} />
-          <Route path="reviews" element={<ReviewManager />} />
-          <Route path="stats" element={<CampaignStatsShowcase />} />
-        </Route>
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Router>
+          <LazyLoad>
+            <LazyComponents.Simulator ref={simulatorRef} />
+          </LazyLoad>
+          <LazyLoad>
+            <LazyComponents.CookieBanner />
+          </LazyLoad>
+          {showA11yTester && <AccessibilityTester />}
+        </div>
+      </Router>
+    </HelmetProvider>
   );
 }
 

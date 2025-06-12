@@ -1,79 +1,204 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import {
+  AppBar,
+  Toolbar,
+  Button,
+  IconButton,
+  Box,
+  Drawer,
+  List,
+  ListItem,
+  ListItemText,
+  useTheme,
+  useMediaQuery,
+  Container,
+} from '@mui/material';
+import { Menu as MenuIcon, Close as CloseIcon } from '@mui/icons-material';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Link, useLocation } from 'react-router-dom';
+import OptimizedImage from '../common/OptimizedImage';
 import { useTranslation } from 'react-i18next';
 import LanguageSelector from '../common/LanguageSelector';
 // Assurez-vous que le chemin vers le CSS est correct
 import '../../assets/styles/header.css';
 
+const navItems = [
+  { label: 'Accueil', path: '/' },
+  { label: 'Services', path: '/services' },
+  { label: 'Portfolio', path: '/portfolio' },
+  { label: 'À propos', path: '/about' },
+  { label: 'Contact', path: '/contact' },
+];
+
 const Header = () => {
   const { t } = useTranslation();
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const location = useLocation();
 
-  // Gestion du scroll pour changer l'apparence du header
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+      setScrolled(window.scrollY > 50);
     };
 
     window.addEventListener('scroll', handleScroll);
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Fermer le menu mobile lors du clic sur un lien
-  const handleNavLinkClick = () => {
-    setIsMobileMenuOpen(false);
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
   };
 
+  const drawer = (
+    <Box
+      component="nav"
+      sx={{
+        width: { sm: 240 },
+        flexShrink: { sm: 0 },
+      }}
+    >
+      <List>
+        {navItems.map((item) => (
+          <ListItem
+            button
+            component={Link}
+            to={item.path}
+            key={item.label}
+            onClick={handleDrawerToggle}
+            selected={location.pathname === item.path}
+            sx={{
+              '&.Mui-selected': {
+                backgroundColor: 'primary.main',
+                color: 'primary.contrastText',
+                '&:hover': {
+                  backgroundColor: 'primary.dark',
+                },
+              },
+            }}
+          >
+            <ListItemText primary={item.label} />
+          </ListItem>
+        ))}
+      </List>
+    </Box>
+  );
+
   return (
-    <header className={`header ${isScrolled ? 'scrolled' : ''}`}>
-      <div className="container header-container">
-        <div className="logo">
-          <a href="#hero" aria-label="MDMC - Retour à l'accueil">
-            {/* === Chemin du logo CORRIGÉ === */}
-            <img src="/assets/images/logo.png" alt="MDMC Logo" />
-            {/* ============================== */}
-          </a>
-        </div>
+    <AppBar
+      position="fixed"
+      component={motion.div}
+      initial={{ y: -100 }}
+      animate={{ y: 0 }}
+      transition={{ duration: 0.5 }}
+      sx={{
+        backgroundColor: scrolled ? 'background.paper' : 'transparent',
+        boxShadow: scrolled ? 1 : 0,
+        transition: 'all 0.3s ease-in-out',
+      }}
+    >
+      <Container maxWidth="lg">
+        <Toolbar disableGutters>
+          <Box
+            component={Link}
+            to="/"
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              textDecoration: 'none',
+              color: 'inherit',
+            }}
+          >
+            <OptimizedImage
+              src="/images/logo.png"
+              alt="MDMC Music Ads Logo"
+              width={120}
+              height={40}
+              priority
+            />
+          </Box>
 
-        <nav className="nav-desktop">
-          <ul>
-            <li><a href="#hero" onClick={handleNavLinkClick}>{t('nav.home')}</a></li>
-            <li><a href="#services" onClick={handleNavLinkClick}>{t('nav.services')}</a></li>
-            <li><a href="#about" onClick={handleNavLinkClick}>{t('nav.about')}</a></li>
-            <li><a href="#articles" onClick={handleNavLinkClick}>{t('nav.articles')}</a></li>
-            <li><a href="#contact" onClick={handleNavLinkClick}>{t('nav.contact')}</a></li>
-            <li><LanguageSelector /></li>
-          </ul>
-        </nav>
+          <Box sx={{ flexGrow: 1 }} />
 
-        <button
-          className={`hamburger-menu ${isMobileMenuOpen ? 'active' : ''}`}
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          aria-expanded={isMobileMenuOpen}
-          aria-label={isMobileMenuOpen ? "Fermer le menu" : "Ouvrir le menu"}
+          {isMobile ? (
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              edge="end"
+              onClick={handleDrawerToggle}
+            >
+              <MenuIcon />
+            </IconButton>
+          ) : (
+            <Box
+              component="nav"
+              sx={{
+                display: 'flex',
+                gap: 2,
+              }}
+            >
+              {navItems.map((item) => (
+                <Button
+                  key={item.label}
+                  component={Link}
+                  to={item.path}
+                  color="inherit"
+                  sx={{
+                    position: 'relative',
+                    '&::after': {
+                      content: '""',
+                      position: 'absolute',
+                      width: '100%',
+                      height: 2,
+                      bottom: 0,
+                      left: 0,
+                      backgroundColor: 'primary.main',
+                      transform: location.pathname === item.path ? 'scaleX(1)' : 'scaleX(0)',
+                      transition: 'transform 0.3s ease-in-out',
+                    },
+                    '&:hover::after': {
+                      transform: 'scaleX(1)',
+                    },
+                  }}
+                >
+                  {item.label}
+                </Button>
+              ))}
+            </Box>
+          )}
+        </Toolbar>
+      </Container>
+
+      <Drawer
+        variant="temporary"
+        anchor="right"
+        open={mobileOpen}
+        onClose={handleDrawerToggle}
+        ModalProps={{
+          keepMounted: true,
+        }}
+        sx={{
+          '& .MuiDrawer-paper': {
+            boxSizing: 'border-box',
+            width: 240,
+          },
+        }}
+      >
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            p: 1,
+          }}
         >
-          <span className="bar"></span>
-          <span className="bar"></span>
-          <span className="bar"></span>
-        </button>
-
-        <nav className={`nav-mobile ${isMobileMenuOpen ? 'active' : ''}`}>
-          <ul>
-            <li><a href="#hero" onClick={handleNavLinkClick}>{t('nav.home')}</a></li>
-            <li><a href="#services" onClick={handleNavLinkClick}>{t('nav.services')}</a></li>
-            <li><a href="#about" onClick={handleNavLinkClick}>{t('nav.about')}</a></li>
-            <li><a href="#articles" onClick={handleNavLinkClick}>{t('nav.articles')}</a></li>
-            <li><a href="#contact" onClick={handleNavLinkClick}>{t('nav.contact')}</a></li>
-            <li className="mobile-language-selector-container">
-              <LanguageSelector />
-            </li>
-          </ul>
-        </nav>
-      </div>
-    </header>
+          <IconButton onClick={handleDrawerToggle}>
+            <CloseIcon />
+          </IconButton>
+        </Box>
+        {drawer}
+      </Drawer>
+    </AppBar>
   );
 };
 

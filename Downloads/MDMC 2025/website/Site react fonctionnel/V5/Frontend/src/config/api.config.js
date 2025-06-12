@@ -9,7 +9,7 @@ console.log("API Base URL for service calls (from api.config.js):", backendBaseU
 
 const API_CONFIG = {
     // BASE_URL est maintenant la base URL complète de ton API backend
-    BASE_URL: backendBaseUrl,
+    BASE_URL: process.env.REACT_APP_API_URL || 'https://mdmcv4-backend-production-b615.up.railway.app/api',
 
     // Timeout des requêtes en millisecondes
     TIMEOUT: 15000, // Un peu plus long pour tenir compte des variations réseau

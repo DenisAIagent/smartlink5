@@ -1,15 +1,18 @@
+@import './styles/fonts.css';
+
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+  font-family: var(--font-primary);
+  line-height: var(--line-height-normal);
+  font-weight: var(--font-weight-normal);
+  font-size: var(--font-size-base);
 
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424; /* Ce fond sera probablement écrasé par celui défini dans global.css */
+  color: var(--text-primary);
+  background-color: var(--background-color);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
+  -webkit-font-smoothing: var(--font-smoothing);
   -moz-osx-font-smoothing: grayscale;
 }
 
@@ -37,9 +40,10 @@ body {
 
 
 h1 {
-  /* Style de base H1 (peut être surchargé dans global.css) */
-  font-size: 3.2em;
-  line-height: 1.1;
+  font-family: var(--font-heading);
+  font-size: var(--font-size-3xl);
+  line-height: var(--line-height-tight);
+  font-weight: var(--font-weight-bold);
 }
 
 button {
