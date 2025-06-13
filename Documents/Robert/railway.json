@@ -1,0 +1,16 @@
+{
+  "build": {
+    "builder": "nixpacks",
+    "buildCommand": "pip install -r requirements.txt && npm install --legacy-peer-deps && npm run build"
+  },
+  "deploy": {
+    "startCommand": "python main.py",
+    "healthcheckPath": "/api/health",
+    "healthcheckTimeout": 60
+  },
+  "variables": {
+    "PYTHON_VERSION": "3.11",
+    "NODE_VERSION": "18",
+    "PORT": "5002"
+  }
+}
