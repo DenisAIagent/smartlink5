@@ -1,10 +1,32 @@
-fastapi>=0.95.0
-uvicorn>=0.21.0
-pydantic>=1.10.0,<2.0.0
+# FastAPI et serveur
+fastapi>=0.104.1
+uvicorn[standard]>=0.24.0
 python-multipart>=0.0.6
-websockets>=11.0
-python-jose>=3.3.0
-passlib>=1.7.4
-bcrypt>=4.0.1
+
+# Modèles et validation
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
+
+# Communication temps réel
+websockets>=12.0
+
+# Utilitaires et sécurité
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4
 python-dotenv>=1.0.0
-aiofiles>=23.1.0 
+
+# Gestion des fichiers
+aiofiles>=23.2.1
+
+# Base de données (optionnel)
+sqlalchemy>=2.0.0
+alembic>=1.13.0
+
+# Outils de développement
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+black>=23.0.0
+flake8>=6.0.0
+
+# Monitoring et logs
+structlog>=23.2.0

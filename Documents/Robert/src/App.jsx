@@ -1,20 +1,16 @@
-import React from 'react';
+// src/App.jsx
+import React, { useState, useRef, useEffect } from 'react';
 
 function App() {
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <div className="max-w-4xl mx-auto">
-        <header className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            🚀 DevCraft AI - Générateur d'Applications
-          </h1>
-          <p className="text-gray-600">
-            Application en cours de reconstruction...
-          </p>
-        </header>
-      </div>
-    </div>
-  );
+  const [messages, setMessages] = useState([
+    {
+      id: 1,
+      type: 'ai',
+      content: "👋 Salut ! Je suis **Robert.ai**...",
+      // ... resto du code de chat
+    }
+  ]);
+  // ... tout le code de l'interface de chat
 }
 
 export default App;

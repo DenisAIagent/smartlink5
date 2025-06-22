@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 from typing import Dict, List, Optional
 from datetime import datetime
 from enum import Enum
@@ -11,7 +11,7 @@ class TemplateType(str, Enum):
 
 class ProjectData(BaseModel):
     description: str = Field(..., min_length=10, description="Description détaillée du projet")
-    features: List[str] = Field(..., min_items=1, description="Liste des fonctionnalités requises")
+    features: List[str] = Field(..., min_length=1, description="Liste des fonctionnalités requises")
     template_type: Optional[TemplateType] = Field(None, description="Type de template à utiliser")
     additional_params: Optional[Dict] = Field(default_factory=dict, description="Paramètres additionnels")
 
@@ -32,13 +32,14 @@ class AnalysisResult(BaseModel):
 class ProjectRecommendation(BaseModel):
     title: str
     description: str
-    priority: str = Field(default="medium", regex="^(low|medium|high)$")
+    priority: str = Field(default="medium", pattern="^(low|medium|high)$")  # FIX: regex → pattern
 
 class AnalyzeRequest(BaseModel):
     description: str = Field(..., min_length=20, description="Description détaillée du projet")
     features: List[str] = Field(default=[], description="Features sélectionnées")
     
-    @validator('description')
+    @field_validator('description')  # FIX: @validator → @field_validator
+    @classmethod
     def description_must_be_meaningful(cls, v):
         if len(v.strip()) < 20:
             raise ValueError('La description doit contenir au moins 20 caractères')
@@ -53,12 +54,13 @@ class AnalysisResponse(BaseModel):
     color_palette: Optional[Dict[str, str]] = None
 
 class GenerateRequest(BaseModel):
-    project_name: str = Field(..., regex="^[a-zA-Z0-9][a-zA-Z0-9-_]{2,49}$")
+    project_name: str = Field(..., pattern="^[a-zA-Z0-9][a-zA-Z0-9-_]{2,49}$")  # FIX: regex → pattern
     description: str = Field(..., min_length=20)
     features: List[str] = Field(default=[])
     template_type: str = "webapp-basic"
     
-    @validator('project_name')
+    @field_validator('project_name')  # FIX: @validator → @field_validator
+    @classmethod
     def project_name_valid(cls, v):
         if not v or len(v) < 3:
             raise ValueError('Le nom du projet doit contenir au moins 3 caractères')
@@ -72,7 +74,7 @@ class GenerateResponse(BaseModel):
 
 class StatusResponse(BaseModel):
     job_id: str
-    status: str = Field(..., regex="^(running|completed|error)$")
+    status: str = Field(..., pattern="^(running|completed|error)$")  # FIX: regex → pattern
     progress: int = Field(default=0, ge=0, le=100)
     current_step: Optional[str] = None
     logs_available: bool = True
@@ -81,4 +83,4 @@ class StatusResponse(BaseModel):
 class ErrorResponse(BaseModel):
     error: str
     details: Optional[str] = None
-    job_id: Optional[str] = None 
+    job_id: Optional[str] = None
