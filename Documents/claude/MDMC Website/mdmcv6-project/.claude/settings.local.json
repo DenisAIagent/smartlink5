@@ -1,0 +1,41 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd:*)",
+      "Bash(git commit -m \"fix: Add development authentication bypass and update MongoDB URI\n\n- Add dev-bypass-token support in auth middleware for development\n- Update MongoDB URI to public Railway endpoint\n- Fix CORS configuration for network access\n- Enable bypass authentication with VITE_BYPASS_AUTH=true\n\n🤖 Generated with [Claude Code](https://claude.ai/code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\")",
+      "Bash(git commit --amend --no-edit)",
+      "Bash(cd:*)",
+      "Bash(git push origin HEAD:main --force)",
+      "Bash(node:*)",
+      "Bash(git add:*)",
+      "Bash(git rm:*)",
+      "Bash(git push:*)",
+      "Bash(find:*)",
+      "Bash(git clone:*)",
+      "Bash(cp:*)",
+      "Bash(git commit:*)",
+      "Bash(python:*)",
+      "Bash(cd:*)",
+      "Bash(cd:*)",
+      "Bash(curl:*)",
+      "Bash(npm start)",
+      "Bash(npm run dev:*)",
+      "Bash(cd:*)",
+      "Bash(grep:*)",
+      "Bash(kill:*)",
+      "Bash(lsof:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run build:*)",
+      "WebFetch(domain:localhost)",
+      "Bash(pkill:*)",
+      "Bash(npx vite:*)",
+      "Bash(mv:*)",
+      "Bash(rm:*)",
+      "Bash(rg:*)",
+      "Bash(npx tsc:*)",
+      "Bash(git rebase:*)",
+      "Bash(git checkout:*)"
+    ],
+    "deny": []
+  }
+}
