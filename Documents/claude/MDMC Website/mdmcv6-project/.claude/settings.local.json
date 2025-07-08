@@ -34,7 +34,12 @@
       "Bash(rg:*)",
       "Bash(npx tsc:*)",
       "Bash(git rebase:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(git fetch:*)",
+      "Bash(cd:*)",
+      "Bash(cd:*)",
+      "Bash(cd:*)",
+      "Bash(git merge:*)"
     ],
     "deny": []
   }
