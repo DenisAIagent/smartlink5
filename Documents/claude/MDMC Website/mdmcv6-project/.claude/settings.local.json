@@ -39,7 +39,8 @@
       "Bash(cd:*)",
       "Bash(cd:*)",
       "Bash(cd:*)",
-      "Bash(git merge:*)"
+      "Bash(git merge:*)",
+      "Bash(touch:*)"
     ],
     "deny": []
   }
