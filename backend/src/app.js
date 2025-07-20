@@ -16,28 +16,13 @@ app.use(helmet());
 app.use(compression());
 app.use(morgan('combined'));
 
-// CORS Configuration
-const corsOptions = {
-  origin: [
-    'http://localhost:3000',
-    'https://smartlink4-frontend-staring.up.railway.app',
-    process.env.CORS_ORIGIN
-  ].filter(Boolean),
+// CORS Configuration - simplified
+app.use(cors({
+  origin: true, // Allow all origins for now
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'x-admin-key']
-};
-
-app.use(cors(corsOptions));
-
-// Additional CORS headers middleware
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-admin-key');
-  next();
-});
+}));
 
 // Body parsing
 app.use(express.json({ limit: '10mb' }));
@@ -72,15 +57,6 @@ const scanLimiter = rateLimit({
   windowMs: 1 * 60 * 1000,
   max: 30,
   message: { error: 'Too many scan requests from this IP, please try again later.' }
-});
-
-// Handle preflight requests for /api/scan
-app.options('/api/scan', (req, res) => {
-  res.header('Access-Control-Allow-Origin', 'https://smartlink4-frontend-staring.up.railway.app');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-admin-key');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.sendStatus(200);
 });
 
 // Direct scan route for frontend compatibility
