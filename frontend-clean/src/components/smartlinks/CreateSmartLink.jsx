@@ -1,7 +1,10 @@
-// components/smartlinks/CreateSmartLink.jsx
+// frontend-clean/src/components/smartlinks/CreateSmartLink.jsx - Version corrigée
 import React, { useState } from 'react';
 import axios from 'axios';
 import './CreateSmartLink.css';
+
+// Configuration API avec URL Railway
+const API_BASE_URL = 'https://extraordinary-embrace-staring.up.railway.app';
 
 const CreateSmartLink = ({ user = { id: 'anonymous' } }) => {
   const [sourceUrl, setSourceUrl] = useState('');
@@ -28,14 +31,21 @@ const CreateSmartLink = ({ user = { id: 'anonymous' } }) => {
     
     setIsScanning(true);
     try {
-      const response = await axios.post('https://extraordinary-embrace-staring.up.railway.app/api/scan', {
+      console.log('🔄 Scanning URL:', sourceUrl);
+      console.log('📡 API URL:', `${API_BASE_URL}/api/scan`);
+
+      const response = await axios.post(`${API_BASE_URL}/api/scan`, {
         url: sourceUrl
       }, {
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
-        timeout: 10000
+        timeout: 15000,
+        withCredentials: true // Important pour CORS
       });
+
+      console.log('✅ Scan response:', response.data);
 
       if (response.data.success) {
         setScanResults(response.data);
@@ -43,20 +53,30 @@ const CreateSmartLink = ({ user = { id: 'anonymous' } }) => {
           title: response.data.metadata.title,
           artist: response.data.metadata.artistName,
           artwork: response.data.metadata.thumbnailUrl,
-          platforms: response.data.data.linksByPlatform
+          platforms: Object.keys(response.data.data.linksByPlatform),
+          url: `${API_BASE_URL}/l/example-slug` // URL temporaire
         });
       } else {
         throw new Error('Scan failed');
       }
     } catch (error) {
-      console.error('Scan error:', error);
+      console.error('❌ Scan error:', error);
+      
+      let errorMessage = 'Erreur lors du scan.';
+      
       if (error.code === 'ECONNABORTED') {
-        alert('Timeout - Le serveur met trop de temps à répondre');
+        errorMessage = 'Timeout - Le serveur met trop de temps à répondre';
       } else if (error.response?.status === 502) {
-        alert('Erreur de connexion - Service temporairement indisponible');
-      } else {
-        alert('Erreur lors du scan. Vérifiez l\'URL et réessayez.');
+        errorMessage = 'Erreur de connexion - Service temporairement indisponible';
+      } else if (error.response?.status === 403) {
+        errorMessage = 'Erreur CORS - Problème de configuration serveur';
+      } else if (error.message.includes('CORS')) {
+        errorMessage = 'Erreur CORS - Vérifiez la configuration du serveur';
+      } else if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
       }
+      
+      alert(errorMessage);
     } finally {
       setIsScanning(false);
     }
@@ -246,10 +266,9 @@ const CreateSmartLink = ({ user = { id: 'anonymous' } }) => {
               <div className="platforms-preview">
                 <h4>Plateformes détectées ({createdLink.platforms?.length || 0})</h4>
                 <div className="platforms-grid">
-                  {(createdLink.platforms || []).map((platform) => (
-                    <div key={platform.id} className="platform-item">
-                      <img src={platform.icon} alt={platform.name} />
-                      <span>{platform.name}</span>
+                  {(createdLink.platforms || []).map((platform, index) => (
+                    <div key={index} className="platform-item">
+                      <span>{platform}</span>
                     </div>
                   ))}
                 </div>
@@ -258,9 +277,6 @@ const CreateSmartLink = ({ user = { id: 'anonymous' } }) => {
               <div className="actions">
                 <button onClick={() => window.open(createdLink.url, '_blank')}>
                   Prévisualiser
-                </button>
-                <button onClick={() => window.location.href = `/analytics/${createdLink.id}`}>
-                  Voir Analytics
                 </button>
                 <button onClick={() => window.location.reload()}>
                   Créer un nouveau
