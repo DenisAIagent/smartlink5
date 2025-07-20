@@ -16,10 +16,18 @@ app.use(compression());
 app.use(morgan('combined'));
 
 // CORS Configuration
-app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
-  credentials: true
-}));
+const corsOptions = {
+  origin: [
+    'http://localhost:3000',
+    'https://smartlink4-frontend-staring.up.railway.app',
+    process.env.CORS_ORIGIN
+  ].filter(Boolean),
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-admin-key']
+};
+
+app.use(cors(corsOptions));
 
 // Body parsing
 app.use(express.json({ limit: '10mb' }));
@@ -48,6 +56,78 @@ const adminRoutes = require('../routes/admin.routes');
 app.use('/api/smartlinks', smartlinkRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/admin', adminRoutes);
+
+// Direct scan route for frontend compatibility
+app.post('/api/scan', require('express-rate-limit')({
+  windowMs: 1 * 60 * 1000,
+  max: 30,
+  message: { error: 'Too many scan requests from this IP, please try again later.' }
+}), async (req, res) => {
+  try {
+    const { url } = req.body;
+
+    if (!url) {
+      return res.status(400).json({ error: 'URL is required' });
+    }
+
+    // Validation URL basique
+    const urlPattern = /^https?:\/\/.+/;
+    if (!urlPattern.test(url)) {
+      return res.status(400).json({ error: 'Valid URL is required' });
+    }
+
+    // Simuler l'appel à l'API Odesli (remplacer par vraie intégration)
+    const mockOdesliResponse = {
+      entityUniqueId: `mock_${Date.now()}`,
+      userCountry: 'FR',
+      pageUrl: url,
+      linksByPlatform: {
+        spotify: {
+          url: 'https://open.spotify.com/track/example',
+          nativeAppUriMobile: 'spotify://track/example',
+          nativeAppUriDesktop: 'spotify://track/example'
+        },
+        appleMusic: {
+          url: 'https://music.apple.com/track/example',
+          nativeAppUriMobile: 'music://track/example',
+          nativeAppUriDesktop: 'music://track/example'
+        },
+        deezer: {
+          url: 'https://www.deezer.com/track/example',
+          nativeAppUriMobile: 'deezer://track/example'
+        },
+        youtube: {
+          url: 'https://www.youtube.com/watch?v=example',
+          nativeAppUriMobile: 'youtube://watch?v=example'
+        },
+        soundcloud: {
+          url: 'https://soundcloud.com/track/example'
+        }
+      },
+      entitiesByUniqueId: {
+        [`mock_${Date.now()}`]: {
+          id: `mock_${Date.now()}`,
+          type: 'song',
+          title: 'Example Song',
+          artistName: 'Example Artist',
+          thumbnailUrl: 'https://via.placeholder.com/300x300?text=Album+Art',
+          thumbnailWidth: 300,
+          thumbnailHeight: 300
+        }
+      }
+    };
+
+    res.json({
+      success: true,
+      data: mockOdesliResponse,
+      platforms: Object.keys(mockOdesliResponse.linksByPlatform),
+      metadata: mockOdesliResponse.entitiesByUniqueId[Object.keys(mockOdesliResponse.entitiesByUniqueId)[0]]
+    });
+  } catch (error) {
+    console.error('Error scanning URL:', error);
+    res.status(500).json({ error: 'Failed to scan URL' });
+  }
+});
 
 // Health check endpoint
 app.get('/health', (req, res) => {
