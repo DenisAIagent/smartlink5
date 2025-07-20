@@ -1,8 +1,9 @@
 // components/smartlinks/CreateSmartLink.jsx
 import React, { useState } from 'react';
+import axios from 'axios';
 import './CreateSmartLink.css';
 
-const CreateSmartLink = ({ user }) => {
+const CreateSmartLink = ({ user = { id: 'anonymous' } }) => {
   const [sourceUrl, setSourceUrl] = useState('');
   const [scanResults, setScanResults] = useState(null);
   const [isScanning, setIsScanning] = useState(false);
@@ -27,28 +28,35 @@ const CreateSmartLink = ({ user }) => {
     
     setIsScanning(true);
     try {
-      const response = await fetch('/api/smartlinks', {
-        method: 'POST',
+      const response = await axios.post('https://extraordinary-embrace-staring.up.railway.app/api/scan', {
+        url: sourceUrl
+      }, {
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          sourceUrl,
-          userId: user.id,
-          customizations
-        }),
+        timeout: 10000
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to create SmartLink');
+      if (response.data.success) {
+        setScanResults(response.data);
+        setCreatedLink({
+          title: response.data.metadata.title,
+          artist: response.data.metadata.artistName,
+          artwork: response.data.metadata.thumbnailUrl,
+          platforms: response.data.data.linksByPlatform
+        });
+      } else {
+        throw new Error('Scan failed');
       }
-
-      const result = await response.json();
-      setCreatedLink(result.smartLink);
-      setScanResults(result.smartLink);
     } catch (error) {
       console.error('Scan error:', error);
-      alert('Erreur lors du scan. Vérifiez l\'URL et réessayez.');
+      if (error.code === 'ECONNABORTED') {
+        alert('Timeout - Le serveur met trop de temps à répondre');
+      } else if (error.response?.status === 502) {
+        alert('Erreur de connexion - Service temporairement indisponible');
+      } else {
+        alert('Erreur lors du scan. Vérifiez l\'URL et réessayez.');
+      }
     } finally {
       setIsScanning(false);
     }
