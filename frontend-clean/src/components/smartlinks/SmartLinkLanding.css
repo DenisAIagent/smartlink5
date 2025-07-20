@@ -1,0 +1,224 @@
+/* SmartLinkLanding.css */
+.smartlink-landing {
+  min-height: 100vh;
+  background: var(--bg-color, #000);
+  color: var(--text-color, #fff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.smartlink-landing::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(29, 185, 84, 0.1), rgba(0, 0, 0, 0.3));
+  z-index: 1;
+}
+
+.landing-container {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  max-width: 480px;
+  width: 100%;
+}
+
+.artwork-section {
+  margin-bottom: 40px;
+}
+
+.artwork-container {
+  position: relative;
+  margin-bottom: 30px;
+}
+
+.artwork-image {
+  width: 280px;
+  height: 280px;
+  border-radius: 20px;
+  object-fit: cover;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s ease;
+  margin: 0 auto;
+  display: block;
+}
+
+.artwork-image:hover {
+  transform: scale(1.05);
+}
+
+.track-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  background: linear-gradient(135deg, var(--text-color, #fff), var(--primary-color, #1DB954));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.artist-name {
+  font-size: 1.3rem;
+  color: var(--text-color, #fff);
+  opacity: 0.8;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.album-name {
+  font-size: 1rem;
+  color: var(--text-color, #fff);
+  opacity: 0.6;
+  margin-bottom: 15px;
+}
+
+.cta-text {
+  color: var(--text-color, #fff);
+  opacity: 0.7;
+  font-size: 1rem;
+}
+
+.platforms-section {
+  margin-bottom: 40px;
+}
+
+.platforms-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.platform-btn {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  padding: 16px 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: var(--text-color, #fff);
+  width: 100%;
+}
+
+.platform-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: var(--platform-color, #1DB954);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.platform-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.platform-icon {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.platform-info {
+  flex: 1;
+  text-align: left;
+}
+
+.platform-name {
+  display: block;
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin-bottom: 2px;
+}
+
+.action-label {
+  display: block;
+  opacity: 0.7;
+  font-size: 0.9rem;
+}
+
+.landing-footer {
+  opacity: 0.5;
+  font-size: 0.8rem;
+}
+
+.landing-loading, .landing-error {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  color: #fff;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #1DB954;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 20px auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .track-title {
+    font-size: 1.5rem;
+  }
+  
+  .artist-name {
+    font-size: 1.1rem;
+  }
+  
+  .artwork-image {
+    width: 240px;
+    height: 240px;
+  }
+  
+  .platforms-grid {
+    gap: 10px;
+  }
+  
+  .platform-btn {
+    padding: 14px 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .artwork-image {
+    width: 200px;
+    height: 200px;
+  }
+  
+  .platform-content {
+    gap: 12px;
+  }
+  
+  .platform-icon {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .platform-name {
+    font-size: 1rem;
+  }
+  
+  .landing-container {
+    padding: 0 10px;
+  }
+}

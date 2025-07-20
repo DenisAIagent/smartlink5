@@ -1,0 +1,37 @@
+{
+  "name": "smartlink-music-system",
+  "version": "1.0.0",
+  "description": "Système de SmartLink musical avec intégration Odesli et tracking analytics complet",
+  "main": "backend/src/app.js",
+  "scripts": {
+    "start": "node backend/src/app.js",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && nodemon src/app.js",
+    "dev:frontend": "cd frontend-clean && npm run dev",
+    "build": "cd frontend-clean && npm run build",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "install:all": "npm install && cd backend && npm install && cd ../frontend-clean && npm install",
+    "deploy:backend": "cd backend && npm start",
+    "deploy:frontend": "cd frontend-clean && npm run build"
+  },
+  "dependencies": {
+    "concurrently": "^8.2.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "keywords": [
+    "music",
+    "smartlink",
+    "streaming",
+    "analytics",
+    "odesli",
+    "gtm",
+    "ga4"
+  ],
+  "author": "MDMC Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
